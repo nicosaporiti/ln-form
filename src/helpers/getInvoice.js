@@ -1,12 +1,20 @@
-const Buda = require("buda-promise");
+// const Buda = require("buda-promise");
 
 export const getInvoice = async (amt, msg) => {
-  const api_key = process.env.REACT_APP_API_KEY;
-  const api_secret = process.env.REACT_APP_API_SECRET;
-  const privateBuda = new Buda(api_key, api_secret);
+  const url = 'https://buda-ln.herokuapp.com/newinvoice';
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      amount: amt,
+      msg: msg,
+    }),
+  });
 
-  const invoice = await privateBuda.lightning_network_invoices(amt, "BTC", msg, false);
+  const data = await res.json();
 
-  return invoice.invoice.encoded_payment_request;
+  return data.invoice
 
 }
