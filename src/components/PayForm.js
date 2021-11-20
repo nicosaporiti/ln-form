@@ -1,13 +1,16 @@
-import React, { useState } from "react";
-import { Container, Grid, Form, Button, Modal, Input } from "semantic-ui-react";
-import QRcode from "qrcode.react";
-import { getInvoice } from "../helpers/getInvoice";
+import React, { useState } from 'react';
+import { Container, Grid, Form, Button, Modal, Input } from 'semantic-ui-react';
+import QRcode from 'qrcode.react';
+import { getInvoice } from '../helpers/getInvoice';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+import './payform.css';
 
 const PayForm = () => {
   const [state, setState] = useState({
-    amount: "",
-    message: "",
-    to: "",
+    amount: '',
+    message: '',
+    to: '',
+    copied: false,
   });
 
   const onSubmit = (event) => {
@@ -18,18 +21,18 @@ const PayForm = () => {
       setState({ to: data });
     });
     setState({
-      amount: "",
-      message: "",
-      to: "",
+      amount: '',
+      message: '',
+      to: '',
     });
   };
 
   return (
     <Container>
-      <Grid columns={2} divided style={{ marginTop: "5vh" }} stackable>
+      <Grid columns={2} divided style={{ marginTop: '5vh' }} stackable>
         <Grid.Row>
           <Grid.Column color="black">
-            <Form inverted style={{ margin: "8px" }} onSubmit={onSubmit}>
+            <Form inverted style={{ margin: '8px' }} onSubmit={onSubmit}>
               <Form.Field>
                 <label>SATS A TRANSFERIR</label>
                 <input
@@ -63,8 +66,8 @@ const PayForm = () => {
                     animated="vertical"
                     color="yellow"
                     floated="right"
-                    style={{ color: "black" }}
-                    disabled={state.amount === 0 || state.message === ""}
+                    style={{ color: 'black' }}
+                    disabled={state.amount === 0 || state.message === ''}
                   >
                     <Button.Content visible>ENVIAR</Button.Content>
                     <Button.Content hidden>⚡</Button.Content>
@@ -73,26 +76,28 @@ const PayForm = () => {
               >
                 <Modal.Content>
                   <Container textAlign="center">
-                    <div style={{ marginBottom: "10px" }}>
+                    <div style={{ marginBottom: '10px' }}>
                       ESCANEA EL CODIGO CON TU WALLET
                     </div>
-                    {state.to === "" ? (
-                      ""
+                    {state.to === '' ? (
+                      ''
                     ) : (
                       <QRcode value={state.to} size={250} renderAs="svg" />
                     )}
-                    <Container style={{ marginTop: "10px" }}>
-                      <Input
-                        action={{
-                          color: "teal",
-                          labelPosition: "right",
-                          icon: "copy",
-                          content: "Copy",
-                          onclick: navigator.clipboard.writeText(state.to),
-                        }}
-                        value={state.to === "" ? "" : state.to}
-                      />
+                    <Container style={{ marginTop: '10px' }}>
+                      <CopyToClipboard
+                        text={state.to}
+                        onCopy={() => setState({ ...state, copied: true })}
+                      >
+                        <Input
+                          icon="copy"
+                          value={state.to === '' ? '' : state.to}
+                          focus
+                          className="input-lna"
+                        />
+                      </CopyToClipboard>
                     </Container>
+                    {state.copied ? 'Dirección copiada en portapapeles' : ''}
                   </Container>
                 </Modal.Content>
               </Modal>
@@ -101,11 +106,11 @@ const PayForm = () => {
           <Grid.Column
             color="yellow"
             textAlign="center"
-            style={{ color: "black" }}
+            style={{ color: 'black' }}
           >
             <h3>PAGA CON</h3>
             <h1>LIGHTNING NETWORK</h1>
-            <p style={{ fontSize: "15px" }}>
+            <p style={{ fontSize: '15px' }}>
               Una red entre pares concebida como sistema de segunda capa para
               Bitcoin que permite hacer micropagos de forma casi instantánea
             </p>
