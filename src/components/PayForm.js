@@ -1,9 +1,18 @@
-import React, { useState } from 'react';
-import { Container, Grid, Form, Button, Modal, Input } from 'semantic-ui-react';
+import React, { useEffect, useState } from 'react';
+import {
+  Container,
+  Grid,
+  Form,
+  Button,
+  Modal,
+  Input,
+  Message,
+} from 'semantic-ui-react';
 import QRcode from 'qrcode.react';
 import { getInvoice } from '../helpers/getInvoice';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import './payform.css';
+import { getPaymentStatus } from '../helpers/getPaymentStatus';
 
 const PayForm = () => {
   const [state, setState] = useState({
@@ -11,6 +20,20 @@ const PayForm = () => {
     message: '',
     to: '',
     copied: false,
+    hidden: true,
+  });
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (state.to !== '') {
+        getPaymentStatus(state.to).then((data) => {
+          if (data) {
+            setState({...state, hidden: false });
+            return clearInterval(interval);
+          }
+        });
+      }
+    }, 5000);
   });
 
   const onSubmit = (event) => {
@@ -18,14 +41,18 @@ const PayForm = () => {
     const a = Number(state.amount);
     const m = state.message;
     getInvoice(a, m).then((data) => {
-      setState({ to: data });
+      setState({ ...state, to: data });
     });
     setState({
+      ...state,
       amount: '',
       message: '',
       to: '',
+      hidden: true
     });
   };
+
+  console.log(state);
 
   return (
     <Container>
@@ -100,6 +127,9 @@ const PayForm = () => {
                     {state.copied ? 'Dirección copiada en portapapeles' : ''}
                   </Container>
                 </Modal.Content>
+                <Container textAlign="center">
+                <Message hidden={state.hidden} compact color="green">Gracias por su pago</Message>
+                </Container>
               </Modal>
             </Form>
           </Grid.Column>
