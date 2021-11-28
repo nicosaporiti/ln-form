@@ -6,9 +6,11 @@ import {
   Button,
   Modal,
   Input,
-  Message,
+  Label,
 } from 'semantic-ui-react';
+import Swal from 'sweetalert2';
 import QRcode from 'qrcode.react';
+import { getBtcPrice } from '../helpers/getBtcPrice';
 import { getInvoice } from '../helpers/getInvoice';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import './payform.css';
@@ -20,39 +22,81 @@ const PayForm = () => {
     message: '',
     to: '',
     copied: false,
-    hidden: true,
+    btc_price: 0,
   });
+
+  useEffect(() => {
+    getBtcPrice()
+      .then((data) => setState({ ...state, btc_price: data }))
+      .catch((err) => {
+        console.log(err);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
       if (state.to !== '') {
-        getPaymentStatus(state.to).then((data) => {
-          if (data) {
-            setState({...state, hidden: false });
-            return clearInterval(interval);
-          }
-        });
+        getPaymentStatus(state.to)
+          .then((data) => {
+            if (data) {
+              Swal.fire({
+                position: 'top-end',
+                icon: 'success',
+                title: 'Transferencia confirmada!',
+                text: `Pago por ${state.amount} sat procesado`,
+                showConfirmButton: false,
+                timer: 6000,
+              });
+              return clearInterval(interval);
+            }
+          })
+          .catch((err) => {
+            Swal.fire({
+              position: 'top-end',
+              icon: 'error',
+              title: err,
+              showConfirmButton: false,
+              timer: 5000,
+            });
+          });
       }
     }, 5000);
   });
+
+  const handleChange = (event) =>{
+  event.preventDefault();
+  const value = event.target.value;
+  if(!isNaN(value))
+  setState({
+    ...state,
+    amount: Number.parseInt(value),
+  })}
 
   const onSubmit = (event) => {
     event.preventDefault();
     const a = Number(state.amount);
     const m = state.message;
-    getInvoice(a, m).then((data) => {
-      setState({ ...state, to: data });
-    });
+    getInvoice(a, m)
+      .then((data) => {
+        setState({ ...state, to: data });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
     setState({
       ...state,
       amount: '',
       message: '',
       to: '',
-      hidden: true
+      hidden: true,
     });
   };
 
-  console.log(state);
+  const sats_to_clp = (
+    (state.btc_price / 100000000) *
+    state.amount
+  ).toLocaleString('es-CL');
 
   return (
     <Container>
@@ -61,16 +105,29 @@ const PayForm = () => {
           <Grid.Column color="black">
             <Form inverted style={{ margin: '8px' }} onSubmit={onSubmit}>
               <Form.Field>
-                <label>SATS A TRANSFERIR</label>
-                <input
-                  placeholder="valores en SATS"
+                <label>
+                  MONTO A TRANSFERIR{' '}
+                  <span style={{ color: 'grey', marginLeft: '10px' }}>
+                    {sats_to_clp === '0' || isNaN(state.amount)
+                      ? ''
+                      : `Aprox CLP ${sats_to_clp}`}
+                  </span>
+                </label>
+                <Input
+                  labelPosition="right"
+                  placeholder="valores en SAT"
                   type="number"
                   min={1}
-                  onChange={(event) =>
-                    setState({ ...state, amount: Number(event.target.value) })
-                  }
+                  onChange={handleChange}
                   value={state.amount}
-                ></input>
+                >
+                  <input />
+                  <Label>
+                    {state.amount === '' || isNaN(state.amount)
+                      ? 'SAT 0'
+                      : `SAT ${state.amount.toLocaleString('es-CL')}`}
+                  </Label>
+                </Input>
               </Form.Field>
               <Form.Field>
                 <label>MENSAJE</label>
@@ -127,9 +184,7 @@ const PayForm = () => {
                     {state.copied ? 'Dirección copiada en portapapeles' : ''}
                   </Container>
                 </Modal.Content>
-                <Container textAlign="center">
-                <Message hidden={state.hidden} compact color="green">Gracias por su pago</Message>
-                </Container>
+                <Container textAlign="center"></Container>
               </Modal>
             </Form>
           </Grid.Column>
@@ -138,11 +193,24 @@ const PayForm = () => {
             textAlign="center"
             style={{ color: 'black' }}
           >
-            <h3>PAGA CON</h3>
+            <h3>ESTAS PAGANDO CON</h3>
             <h1>LIGHTNING NETWORK</h1>
-            <p style={{ fontSize: '15px' }}>
-              Una red entre pares concebida como sistema de segunda capa para
-              Bitcoin que permite hacer micropagos de forma casi instantánea
+            <h5 style={{ fontSize: '15px' }}>
+              {state.btc_price === 0
+                ? ''
+                : `Precio actual Bitcoin: CLP ${state.btc_price.toLocaleString(
+                    'es-CL'
+                  )}`}
+            </h5>
+            <p>
+              Fuente{' '}
+              <a
+                href="https://www.coingecko.com/"
+                target="_blank"
+                rel="noreferrer"
+              >
+                CoinGecko
+              </a>
             </p>
           </Grid.Column>
         </Grid.Row>

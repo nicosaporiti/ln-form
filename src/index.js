@@ -5,9 +5,9 @@ import 'semantic-ui-css/semantic.min.css';
 import PayForm from "./components/PayForm";
 
 ReactDOM.render(
-  <React.StrictMode>
+  <>
     <PayForm />
-  </React.StrictMode>,
+  </>,
   document.getElementById('root')
 );
 

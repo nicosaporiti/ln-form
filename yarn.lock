@@ -1676,6 +1676,16 @@
     "@svgr/plugin-svgo" "^5.5.0"
     "loader-utils" "^2.0.0"
 
+"@sweetalert2/theme-dark@^5.0.8":
+  "integrity" "sha512-erhXs3GMwlCXnONZ/sRbh/krlsFkR9hmcUJ1Zr/6dz+9OpMBU0AL2gx+V7A056wBGLX0deziLGsDecoSIkKOWg=="
+  "resolved" "https://registry.npmjs.org/@sweetalert2/theme-dark/-/theme-dark-5.0.8.tgz"
+  "version" "5.0.8"
+
+"@sweetalert2/themes@^5.0.8":
+  "integrity" "sha512-z6AZwcAn2/DlmD8+HJx//SzPFiGQ3a9Ss7dvWDMaUpvrzd7pUxQ75rerk20elSGrl1APy5qY/Ry+faKmHSbdsw=="
+  "resolved" "https://registry.npmjs.org/@sweetalert2/themes/-/themes-5.0.8.tgz"
+  "version" "5.0.8"
+
 "@testing-library/dom@^7.28.1", "@testing-library/dom@>=7.21.4":
   "integrity" "sha512-3UqjCpey6HiTZT92vODYLPxTBWlM8ZOOjr3LX5F37/VRipW2M1kX6I/Cm4VXzteZqfGfagg8yXywpcOgQBlNsQ=="
   "resolved" "https://registry.npmjs.org/@testing-library/dom/-/dom-7.31.2.tgz"
@@ -2836,7 +2846,7 @@
   "resolved" "https://registry.npmjs.org/binary-extensions/-/binary-extensions-2.2.0.tgz"
   "version" "2.2.0"
 
-"bluebird@^3.5.0", "bluebird@^3.5.5":
+"bluebird@^3.5.5":
   "integrity" "sha512-XpNj6GDQzdfW+r2Wnn7xiSAd7TM3jzkxGXBGTtWKuSXv1xUV+azxAm8jdWZN06QTQk+2N2XB9jRDkvbmQmcRtg=="
   "resolved" "https://registry.npmjs.org/bluebird/-/bluebird-3.7.2.tgz"
   "version" "3.7.2"
@@ -3025,16 +3035,6 @@
   "version" "2.1.1"
   dependencies:
     "node-int64" "^0.4.0"
-
-"buda-promise@^0.1.5":
-  "integrity" "sha512-EwO2MbG+ZvCl+UIoztkgZFsRW5Rz9VTepjrDNkZfW3ztCpDoTS/MzshpquVCR+E16prUOosZYrhQvEv5VQ30pg=="
-  "resolved" "https://registry.npmjs.org/buda-promise/-/buda-promise-0.1.5.tgz"
-  "version" "0.1.5"
-  dependencies:
-    "bluebird" "^3.5.0"
-    "request" "^2.81.0"
-    "request-promise" "^4.2.1"
-    "underscore" "1.8.3"
 
 "buffer-from@^1.0.0":
   "integrity" "sha512-MQcXEUbCKtEo7bhqEs6560Hyd4XaovZlO/k9V3hjVUF/zwW7KBVdSK4gIt/bzwS9MbR5qob+F5jusZsb0YQK2A=="
@@ -9702,17 +9702,7 @@
     "stealthy-require" "^1.1.1"
     "tough-cookie" "^2.3.3"
 
-"request-promise@^4.2.1":
-  "integrity" "sha512-HCHI3DJJUakkOr8fNoCc73E5nU5bqITjOYFMDrKHYOXWXrgD/SBaC7LjwuPymUprRyuF06UK7hd/lMHkmUXglQ=="
-  "resolved" "https://registry.npmjs.org/request-promise/-/request-promise-4.2.6.tgz"
-  "version" "4.2.6"
-  dependencies:
-    "bluebird" "^3.5.0"
-    "request-promise-core" "1.1.4"
-    "stealthy-require" "^1.1.1"
-    "tough-cookie" "^2.3.3"
-
-"request@^2.34", "request@^2.81.0", "request@^2.88.2":
+"request@^2.34", "request@^2.88.2":
   "integrity" "sha512-MsvtOrfG9ZcrOwAW+Qi+F6HbD0CWXEh9ou77uOb7FM2WPhwT7smM833PzanhJLsgXjN89Ir6V2PczXNnMpwKhw=="
   "resolved" "https://registry.npmjs.org/request/-/request-2.88.2.tgz"
   "version" "2.88.2"
@@ -10838,6 +10828,11 @@
     "unquote" "~1.1.1"
     "util.promisify" "~1.0.0"
 
+"sweetalert2@^11.0.0", "sweetalert2@^11.2.1":
+  "integrity" "sha512-6O+Ftl3yCg58pUqMiEn58+p7bQd7h7YrAM1diSaTJcRPO23bcfVd2DI2hW3246XVlTgL+EauV76va6VN5LrfIw=="
+  "resolved" "https://registry.npmjs.org/sweetalert2/-/sweetalert2-11.2.1.tgz"
+  "version" "11.2.1"
+
 "symbol-tree@^3.2.4":
   "integrity" "sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw=="
   "resolved" "https://registry.npmjs.org/symbol-tree/-/symbol-tree-3.2.4.tgz"
@@ -11204,11 +11199,6 @@
   "integrity" "sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c="
   "resolved" "https://registry.npmjs.org/typedarray/-/typedarray-0.0.6.tgz"
   "version" "0.0.6"
-
-"underscore@1.8.3":
-  "integrity" "sha1-Tz+1OxBuYJf8+ctBCfKl6b36UCI="
-  "resolved" "https://registry.npmjs.org/underscore/-/underscore-1.8.3.tgz"
-  "version" "1.8.3"
 
 "unicode-canonical-property-names-ecmascript@^1.0.4":
   "integrity" "sha512-jDrNnXWHd4oHiTZnx/ZG7gtUTVp+gCcTTKr8L0HjlwphROEW3+Him+IpvC+xcJEFegapiMZyZe02CyuOnRmbnQ=="
