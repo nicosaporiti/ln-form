@@ -1,7 +1,7 @@
 // const Buda = require("buda-promise");
 
 export const getInvoice = async (amt, msg) => {
-  const url = 'https://buda-ln.herokuapp.com/newinvoice';
+  const url = process.env.REACT_APP_API_URL_INVOICE;
   const res = await fetch(url, {
     method: 'POST',
     headers: {

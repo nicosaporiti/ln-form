@@ -1,5 +1,5 @@
 export const getPaymentStatus = async (invoice) => {
-    const url = 'https://buda-ln.herokuapp.com/status';
+    const url = process.env.REACT_APP_API_URL_STATUS;
     const res = await fetch(url, {
       method: 'POST',
       headers: {
