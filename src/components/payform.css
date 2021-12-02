@@ -1,6 +1,10 @@
 body {
-    background-color: #fbbd08;
+    background-color: #303135;
 }
 .input-lna input{
     cursor: pointer !important;
+}
+
+label {
+    text-align: left;
 }

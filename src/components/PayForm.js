@@ -7,6 +7,7 @@ import {
   Modal,
   Input,
   Label,
+  Header,
 } from 'semantic-ui-react';
 import Swal from 'sweetalert2';
 import QRcode from 'qrcode.react';
@@ -64,14 +65,15 @@ const PayForm = () => {
     }, 5000);
   });
 
-  const handleChange = (event) =>{
-  event.preventDefault();
-  const value = event.target.value;
-  if(!isNaN(value))
-  setState({
-    ...state,
-    amount: Number.parseInt(value),
-  })}
+  const handleChange = (event) => {
+    event.preventDefault();
+    const value = event.target.value;
+    if (!isNaN(value))
+      setState({
+        ...state,
+        amount: Number.parseInt(value),
+      });
+  };
 
   const onSubmit = (event) => {
     event.preventDefault();
@@ -100,99 +102,14 @@ const PayForm = () => {
 
   return (
     <Container>
-      <Grid columns={2} divided style={{ marginTop: '5vh' }} stackable>
-        <Grid.Row>
-          <Grid.Column color="black">
-            <Form inverted style={{ margin: '8px' }} onSubmit={onSubmit}>
-              <Form.Field>
-                <label>
-                  MONTO A TRANSFERIR{' '}
-                  <span style={{ color: 'grey', marginLeft: '10px' }}>
-                    {sats_to_clp === '0' || isNaN(state.amount)
-                      ? ''
-                      : `Aprox CLP ${sats_to_clp}`}
-                  </span>
-                </label>
-                <Input
-                  labelPosition="right"
-                  placeholder="valores en SAT"
-                  type="number"
-                  min={1}
-                  onChange={handleChange}
-                  value={state.amount}
-                >
-                  <input />
-                  <Label>
-                    {state.amount === '' || isNaN(state.amount)
-                      ? 'SAT 0'
-                      : `SAT ${state.amount.toLocaleString('es-CL')}`}
-                  </Label>
-                </Input>
-              </Form.Field>
-              <Form.Field>
-                <label>MENSAJE</label>
-                <input
-                  placeholder="ingresar un comentario"
-                  onChange={(event) =>
-                    setState({ ...state, message: event.target.value })
-                  }
-                  value={state.message}
-                ></input>
-              </Form.Field>
-
-              <Modal
-                basic
-                centered={false}
-                onClose={() => window.location.reload()}
-                trigger={
-                  <Button
-                    type="submit"
-                    animated="vertical"
-                    color="yellow"
-                    floated="right"
-                    style={{ color: 'black' }}
-                    disabled={state.amount === 0 || state.message === ''}
-                  >
-                    <Button.Content visible>ENVIAR</Button.Content>
-                    <Button.Content hidden>⚡</Button.Content>
-                  </Button>
-                }
-              >
-                <Modal.Content>
-                  <Container textAlign="center">
-                    <div style={{ marginBottom: '10px' }}>
-                      ESCANEA EL CODIGO CON TU WALLET
-                    </div>
-                    {state.to === '' ? (
-                      ''
-                    ) : (
-                      <QRcode value={state.to} size={250} renderAs="svg" />
-                    )}
-                    <Container style={{ marginTop: '10px' }}>
-                      <CopyToClipboard
-                        text={state.to}
-                        onCopy={() => setState({ ...state, copied: true })}
-                      >
-                        <Input
-                          icon="copy"
-                          value={state.to === '' ? '' : state.to}
-                          focus
-                          className="input-lna"
-                        />
-                      </CopyToClipboard>
-                    </Container>
-                    {state.copied ? 'Dirección copiada en portapapeles' : ''}
-                  </Container>
-                </Modal.Content>
-                <Container textAlign="center"></Container>
-              </Modal>
-            </Form>
-          </Grid.Column>
-          <Grid.Column
-            color="yellow"
-            textAlign="center"
-            style={{ color: 'black' }}
-          >
+      <Grid
+        textAlign="center"
+        style={{ height: '100vh' }}
+        verticalAlign="middle"
+        stackable
+      >
+        <Grid.Column color="black" style={{ maxWidth: 450 }}>
+          <Header textAlign="center" style={{ color: 'white' }}>
             <h3>ESTAS PAGANDO CON</h3>
             <h1>LIGHTNING NETWORK</h1>
             <h5 style={{ fontSize: '15px' }}>
@@ -202,7 +119,7 @@ const PayForm = () => {
                     'es-CL'
                   )}`}
             </h5>
-            <p>
+            <p style={{ fontSize: '12px' }}>
               Fuente{' '}
               <a
                 href="https://www.coingecko.com/"
@@ -212,8 +129,92 @@ const PayForm = () => {
                 CoinGecko
               </a>
             </p>
-          </Grid.Column>
-        </Grid.Row>
+          </Header>
+          <Form inverted style={{ margin: '8px' }} onSubmit={onSubmit}>
+            <Form.Field>
+              <label>
+                MONTO A TRANSFERIR{' '}
+                <span style={{ color: 'grey', marginLeft: '10px' }}>
+                  {sats_to_clp === '0' || isNaN(state.amount)
+                    ? ''
+                    : `Aprox CLP ${sats_to_clp}`}
+                </span>
+              </label>
+              <Input
+                labelPosition="right"
+                placeholder="valores en SAT"
+                type="number"
+                min={1}
+                onChange={handleChange}
+                value={state.amount}
+              >
+                <input />
+                <Label>
+                  {state.amount === '' || isNaN(state.amount)
+                    ? 'SAT 0'
+                    : `SAT ${state.amount.toLocaleString('es-CL')}`}
+                </Label>
+              </Input>
+            </Form.Field>
+            <Form.Field>
+              <label>MENSAJE</label>
+              <input
+                placeholder="ingresar un comentario"
+                onChange={(event) =>
+                  setState({ ...state, message: event.target.value })
+                }
+                value={state.message}
+              ></input>
+            </Form.Field>
+
+            <Modal
+              basic
+              centered={false}
+              onClose={() => window.location.reload()}
+              trigger={
+                <Button
+                  type="submit"
+                  animated="vertical"
+                  color="yellow"
+                  fluid
+                  style={{ color: 'black' }}
+                  disabled={state.amount === 0 || state.message === ''}
+                >
+                  <Button.Content visible>ENVIAR</Button.Content>
+                  <Button.Content hidden>⚡</Button.Content>
+                </Button>
+              }
+            >
+              <Modal.Content>
+                <Container textAlign="center">
+                  <div style={{ marginBottom: '10px' }}>
+                    ESCANEA EL CODIGO CON TU WALLET
+                  </div>
+                  {state.to === '' ? (
+                    ''
+                  ) : (
+                    <QRcode value={state.to} size={250} renderAs="svg" />
+                  )}
+                  <Container style={{ marginTop: '10px' }}>
+                    <CopyToClipboard
+                      text={state.to}
+                      onCopy={() => setState({ ...state, copied: true })}
+                    >
+                      <Input
+                        icon="copy"
+                        value={state.to === '' ? '' : state.to}
+                        focus
+                        className="input-lna"
+                      />
+                    </CopyToClipboard>
+                  </Container>
+                  {state.copied ? 'Dirección copiada en portapapeles' : ''}
+                </Container>
+              </Modal.Content>
+              <Container textAlign="center"></Container>
+            </Modal>
+          </Form>
+        </Grid.Column>
       </Grid>
     </Container>
   );
