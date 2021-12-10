@@ -8,3 +8,7 @@ body {
 label {
     text-align: left;
 }
+
+.black {
+    border-radius: 2%;
+}

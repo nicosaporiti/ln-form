@@ -110,8 +110,9 @@ const PayForm = () => {
       >
         <Grid.Column color="black" style={{ maxWidth: 450 }}>
           <Header textAlign="center" style={{ color: 'white' }}>
-            <h3>ESTAS PAGANDO CON</h3>
-            <h1>LIGHTNING NETWORK</h1>
+            <h3>ESTAS PAGANDO A</h3>
+            <p style={{ color: 'grey'}}>Nicolás Saporiti</p>
+            <h3>CON LIGHTNING NETWORK</h3>
             <h5 style={{ fontSize: '15px' }}>
               {state.btc_price === 0
                 ? ''
