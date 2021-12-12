@@ -5,6 +5,14 @@ body {
     cursor: pointer !important;
 }
 
+a {
+    color:#806514
+}
+
+a:hover {
+    color:#fbbd08
+}
+
 label {
     text-align: left;
 }
@@ -15,4 +23,17 @@ label {
 
 .selection {
     border-radius: 0% !important;
+}
+
+.ui.checkbox label {
+    color: #fbbd08 !important;
+}
+
+.ui.checkbox label::before {
+    background: #806514 !important;
+    border-color: #806514 !important;
+}
+
+.ui.checked.checkbox label::after {
+    background: #fbbd08 !important;
 }

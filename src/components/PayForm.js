@@ -124,10 +124,9 @@ const PayForm = () => {
       });
     }
   };
-  
+
   const sats_to_clp = Math.ceil(
-    (state.btc_price / 100000000) *
-    state.amount
+    (state.btc_price / 100000000) * state.amount
   ).toLocaleString('es-CL');
 
   return (
@@ -151,17 +150,19 @@ const PayForm = () => {
                   )}`}
             </h5>
             <p style={{ fontSize: '12px' }}>
-              Fuente{' '}
               <a
                 href="https://www.coingecko.com/"
                 target="_blank"
                 rel="noreferrer"
               >
-                CoinGecko
+                Fuente CoinGecko
               </a>
             </p>
           </Header>
           <Form inverted style={{ margin: '8px' }} onSubmit={onSubmit}>
+            <Header textAlign="right" style={{ marginTop: '25px' }}>
+              <Checkbox label="Valores en CLP" onChange={handleCheck} />
+            </Header>
             <Form.Field>
               <label>
                 MONTO A TRANSFERIR{' '}
@@ -191,12 +192,6 @@ const PayForm = () => {
                 </Label>
               </Input>
             </Form.Field>
-            <Grid textAlign="left" style={{ margin: '10px -10px' }}>
-              <Checkbox
-                label="Ingresar valores en CLP"
-                onChange={handleCheck}
-              />
-            </Grid>
             <Form.Field>
               <label>MENSAJE</label>
               <input
