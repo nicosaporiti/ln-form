@@ -8,6 +8,7 @@ import {
   Input,
   Label,
   Header,
+  Checkbox,
 } from 'semantic-ui-react';
 import Swal from 'sweetalert2';
 import QRcode from 'qrcode.react';
@@ -20,10 +21,12 @@ import { getPaymentStatus } from '../helpers/getPaymentStatus';
 const PayForm = () => {
   const [state, setState] = useState({
     amount: '',
+    amount_clp: '',
     message: '',
     to: '',
     copied: false,
     btc_price: 0,
+    checked: false,
   });
 
   useEffect(() => {
@@ -68,11 +71,18 @@ const PayForm = () => {
   const handleChange = (event) => {
     event.preventDefault();
     const value = event.target.value;
-    if (!isNaN(value))
+    if (!isNaN(value) && !state.checked)
       setState({
         ...state,
         amount: Number.parseInt(value),
       });
+    else {
+      setState({
+        ...state,
+        amount: Number.parseInt((value / state.btc_price) * 100000000),
+        amount_clp: value,
+      });
+    }
   };
 
   const onSubmit = (event) => {
@@ -95,6 +105,26 @@ const PayForm = () => {
     });
   };
 
+  const handleCheck = () => {
+    if (state.checked) {
+      setState({
+        ...state,
+        amount: '',
+        message: '',
+        amount_clp: '',
+        checked: false,
+      });
+    } else {
+      setState({
+        ...state,
+        amount: '',
+        message: '',
+        amount_clp: '',
+        checked: true,
+      });
+    }
+  };
+  
   const sats_to_clp = (
     (state.btc_price / 100000000) *
     state.amount
@@ -111,7 +141,7 @@ const PayForm = () => {
         <Grid.Column color="black" style={{ maxWidth: 450 }}>
           <Header textAlign="center" style={{ color: 'white' }}>
             <h3>ESTAS PAGANDO A</h3>
-            <p style={{ color: 'grey'}}>Nicolás Saporiti</p>
+            <p style={{ color: 'grey' }}>Nicolás Saporiti</p>
             <h3>CON LIGHTNING NETWORK</h3>
             <h5 style={{ fontSize: '15px' }}>
               {state.btc_price === 0
@@ -143,11 +173,15 @@ const PayForm = () => {
               </label>
               <Input
                 labelPosition="right"
-                placeholder="valores en SAT"
+                placeholder={
+                  state.checked
+                    ? 'Ingresar valores en CLP'
+                    : 'Ingresar valores en SAT'
+                }
                 type="number"
                 min={1}
                 onChange={handleChange}
-                value={state.amount}
+                value={state.checked ? state.amount_clp : state.amount}
               >
                 <input />
                 <Label>
@@ -157,6 +191,12 @@ const PayForm = () => {
                 </Label>
               </Input>
             </Form.Field>
+            <Grid textAlign="left" style={{ margin: '10px -10px' }}>
+              <Checkbox
+                label="Ingresar valores en CLP"
+                onChange={handleCheck}
+              />
+            </Grid>
             <Form.Field>
               <label>MENSAJE</label>
               <input

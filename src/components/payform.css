@@ -12,3 +12,7 @@ label {
 .black {
     border-radius: 2%;
 }
+
+.selection {
+    border-radius: 0% !important;
+}
