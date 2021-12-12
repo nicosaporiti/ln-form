@@ -80,7 +80,7 @@ const PayForm = () => {
       setState({
         ...state,
         amount: Number.parseInt((value / state.btc_price) * 100000000),
-        amount_clp: value,
+        amount_clp: Number.parseInt(value),
       });
     }
   };
@@ -125,7 +125,7 @@ const PayForm = () => {
     }
   };
   
-  const sats_to_clp = (
+  const sats_to_clp = Math.ceil(
     (state.btc_price / 100000000) *
     state.amount
   ).toLocaleString('es-CL');
@@ -168,7 +168,7 @@ const PayForm = () => {
                 <span style={{ color: 'grey', marginLeft: '10px' }}>
                   {sats_to_clp === '0' || isNaN(state.amount)
                     ? ''
-                    : `Aprox CLP ${sats_to_clp}`}
+                    : `Valor en CLP ${sats_to_clp}`}
                 </span>
               </label>
               <Input
