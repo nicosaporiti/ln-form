@@ -29,14 +29,26 @@ const PayForm = () => {
     checked: false,
   });
 
+  const queryParams = new URLSearchParams(window.location.search);
+
+  const queryAmount = parseInt(queryParams.get('amount'));
+  const queryMemo = queryParams.get('memo');
+
   useEffect(() => {
     getBtcPrice()
-      .then((data) => setState({ ...state, btc_price: data }))
+      .then((data) =>
+        setState({
+          ...state,
+          btc_price: data,
+          amount: queryAmount ? ((queryAmount / state.btc_price) * 100000000).toFixed() : '',
+          message: queryMemo ? queryMemo : '',
+        })
+      )
       .catch((err) => {
         console.log(err);
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [state.btc_price]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -128,6 +140,8 @@ const PayForm = () => {
   const sats_to_clp = Math.ceil(
     (state.btc_price / 100000000) * state.amount
   ).toLocaleString('es-CL');
+
+  console.log(state)
 
   return (
     <Container>
