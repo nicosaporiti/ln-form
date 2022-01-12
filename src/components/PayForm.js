@@ -141,8 +141,6 @@ const PayForm = () => {
     (state.btc_price / 100000000) * state.amount
   ).toLocaleString('es-CL');
 
-  console.log(state)
-
   return (
     <Container>
       <Grid
