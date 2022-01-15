@@ -40,7 +40,9 @@ const PayForm = () => {
         setState({
           ...state,
           btc_price: data,
-          amount: queryAmount ? ((queryAmount / state.btc_price) * 100000000).toFixed() : '',
+          amount: queryAmount
+            ? ((queryAmount / state.btc_price) * 100000000).toFixed()
+            : '',
           message: queryMemo ? queryMemo : '',
         })
       )
@@ -257,6 +259,16 @@ const PayForm = () => {
                     </CopyToClipboard>
                   </Container>
                   {state.copied ? 'Dirección copiada en portapapeles' : ''}
+                  <div>
+                    <Button
+                      href={'lightning:' + state.to}
+                      style={{ marginTop: '25px', color: 'black' }}
+                      color="yellow"
+                      content="ABRIR WALLET"
+                      icon="lightning"
+                      labelPosition="left"
+                    />
+                  </div>
                 </Container>
               </Modal.Content>
               <Container textAlign="center"></Container>

@@ -37,3 +37,7 @@ label {
 .ui.checked.checkbox label::after {
     background: #fbbd08 !important;
 }
+
+.open {
+    margin-top: 50px !important;
+}
