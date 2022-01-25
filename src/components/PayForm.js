@@ -11,12 +11,11 @@ import {
   Checkbox,
 } from 'semantic-ui-react';
 import Swal from 'sweetalert2';
-import QRcode from 'qrcode.react';
 import { getBtcPrice } from '../helpers/getBtcPrice';
 import { getInvoice } from '../helpers/getInvoice';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
 import './payform.css';
 import { getPaymentStatus } from '../helpers/getPaymentStatus';
+import { QrModal } from './QrModal';
 
 const PayForm = () => {
   const [state, setState] = useState({
@@ -39,11 +38,7 @@ const PayForm = () => {
       .then((data) =>
         setState({
           ...state,
-          btc_price: data,
-          amount: queryAmount
-            ? ((queryAmount / state.btc_price) * 100000000).toFixed()
-            : '',
-          message: queryMemo ? queryMemo : '',
+          btc_price: data
         })
       )
       .catch((err) => {
@@ -51,6 +46,19 @@ const PayForm = () => {
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.btc_price]);
+
+  useEffect(() => {
+    if(queryAmount && queryMemo){
+      getInvoice(queryAmount, queryMemo)
+      .then((data) => {
+        setState({ ...state, to: data });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[])
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -143,7 +151,9 @@ const PayForm = () => {
     (state.btc_price / 100000000) * state.amount
   ).toLocaleString('es-CL');
 
-  return (
+  return queryAmount && queryMemo ? (
+    <QrModal data={state} handleCopy={setState}/>
+  ) : (
     <Container>
       <Grid
         textAlign="center"
@@ -236,41 +246,9 @@ const PayForm = () => {
               }
             >
               <Modal.Content>
-                <Container textAlign="center">
-                  <div style={{ marginBottom: '10px' }}>
-                    ESCANEA EL CODIGO CON TU WALLET
-                  </div>
-                  {state.to === '' ? (
-                    ''
-                  ) : (
-                    <QRcode value={state.to} size={250} renderAs="svg" />
-                  )}
-                  <Container style={{ marginTop: '10px' }}>
-                    <CopyToClipboard
-                      text={state.to}
-                      onCopy={() => setState({ ...state, copied: true })}
-                    >
-                      <Input
-                        icon="copy"
-                        value={state.to === '' ? '' : state.to}
-                        focus
-                        className="input-lna"
-                      />
-                    </CopyToClipboard>
-                  </Container>
-                  {state.copied ? 'Dirección copiada en portapapeles' : ''}
-                  <div>
-                    <Button
-                      href={'lightning:' + state.to}
-                      style={{ marginTop: '25px', color: 'black' }}
-                      color="yellow"
-                      content="ABRIR WALLET"
-                      icon="lightning"
-                      labelPosition="left"
-                    />
-                  </div>
-                </Container>
+                <QrModal data={state} handleCopy={setState}/>
               </Modal.Content>
+
               <Container textAlign="center"></Container>
             </Modal>
           </Form>
