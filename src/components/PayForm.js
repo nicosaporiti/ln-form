@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Container,
   Grid,
@@ -9,67 +9,79 @@ import {
   Label,
   Header,
   Checkbox,
-} from 'semantic-ui-react';
-import Swal from 'sweetalert2';
-import { getBtcPrice } from '../helpers/getBtcPrice';
-import { getInvoice } from '../helpers/getInvoice';
-import './payform.css';
-import { getPaymentStatus } from '../helpers/getPaymentStatus';
-import { QrModal } from './QrModal';
+  Dropdown,
+  Divider,
+} from "semantic-ui-react";
+import Swal from "sweetalert2";
+import { getBtcPrice } from "../helpers/getBtcPrice";
+import { getInvoice } from "../helpers/getInvoice";
+import { getCurencies } from "./../helpers/getCurrencies";
+import "./payform.css";
+import { getPaymentStatus } from "../helpers/getPaymentStatus";
+import { QrModal } from "./QrModal";
 
 const PayForm = () => {
   const [state, setState] = useState({
-    amount: '',
-    amount_clp: '',
-    message: '',
-    to: '',
+    amount: "",
+    amount_clp: "",
+    message: "",
+    to: "",
     copied: false,
     btc_price: 0,
     checked: false,
+    currencies: [],
+    currency: "clp",
   });
 
   const queryParams = new URLSearchParams(window.location.search);
 
-  const queryAmount = parseInt(queryParams.get('amount'));
-  const queryMemo = queryParams.get('memo');
+  const queryAmount = parseInt(queryParams.get("amount"));
+  const queryMemo = queryParams.get("memo");
+  const queryCurrency = queryParams.get("curr");
+
+  console.log(state);
 
   useEffect(() => {
-    getBtcPrice()
-      .then((data) =>
-        setState({
-          ...state,
-          btc_price: data
-        })
-      )
-      .catch((err) => {
-        console.log(err);
-      });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.btc_price]);
-
-  useEffect(() => {
-    if(queryAmount && queryMemo){
-      getInvoice(queryAmount, queryMemo)
-      .then((data) => {
-        setState({ ...state, to: data });
+    Promise.all([getBtcPrice(state.currency), getCurencies()])
+      .then((values) => {
+        setState({ ...state, btc_price: values[0], currencies: values[1] });
       })
       .catch((err) => {
         console.log(err);
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (queryAmount && queryMemo && queryCurrency) {
+      getBtcPrice(queryCurrency)
+        .then((data) => {
+          return queryCurrency === "sat"
+            ? queryAmount
+            : parseInt((queryAmount / data) * 100000000);
+        })
+        .then((amt) => {
+          getInvoice(amt, queryMemo).then((invoice) => {
+            setState({ ...state, to: invoice });
+          });
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (state.to !== '') {
+      if (state.to !== "") {
         getPaymentStatus(state.to)
           .then((data) => {
             if (data) {
               Swal.fire({
-                position: 'top-end',
-                icon: 'success',
-                title: 'Transferencia confirmada!',
+                position: "top-end",
+                icon: "success",
+                title: "Transferencia confirmada!",
                 text: `Pago por ${state.amount} sat procesado`,
                 showConfirmButton: false,
                 timer: 6000,
@@ -79,8 +91,8 @@ const PayForm = () => {
           })
           .catch((err) => {
             Swal.fire({
-              position: 'top-end',
-              icon: 'error',
+              position: "top-end",
+              icon: "error",
               title: err,
               showConfirmButton: false,
               timer: 5000,
@@ -120,9 +132,9 @@ const PayForm = () => {
       });
     setState({
       ...state,
-      amount: '',
-      message: '',
-      to: '',
+      amount: "",
+      message: "",
+      to: "",
       hidden: true,
     });
   };
@@ -131,49 +143,78 @@ const PayForm = () => {
     if (state.checked) {
       setState({
         ...state,
-        amount: '',
-        message: '',
-        amount_clp: '',
+        amount: "",
+        message: "",
+        amount_clp: "",
         checked: false,
       });
     } else {
       setState({
         ...state,
-        amount: '',
-        message: '',
-        amount_clp: '',
+        amount: "",
+        message: "",
+        amount_clp: "",
         checked: true,
       });
     }
   };
 
+  const handleCurrency = (e, data) => {
+    e.preventDefault();
+    const indx = data.value;
+    const curr = data.options[indx].text;
+
+    getBtcPrice(curr)
+      .then((price) =>
+        setState({
+          ...state,
+          btc_price: price,
+          currency: curr.toUpperCase(),
+          amount: "",
+          message: "",
+          amount_clp: "",
+        })
+      )
+      .catch((err) => console.log(err));
+  };
+
   const sats_to_clp = Math.ceil(
     (state.btc_price / 100000000) * state.amount
-  ).toLocaleString('es-CL');
+  ).toLocaleString("es-CL");
 
   return queryAmount && queryMemo ? (
-    <QrModal data={state} handleCopy={setState}/>
+    <QrModal data={state} handleCopy={setState} />
   ) : (
     <Container>
       <Grid
         textAlign="center"
-        style={{ height: '100vh' }}
+        style={{ height: "100vh" }}
         verticalAlign="middle"
         stackable
       >
         <Grid.Column color="black" style={{ maxWidth: 450 }}>
-          <Header textAlign="center" style={{ color: 'white' }}>
+          <Header textAlign="center" style={{ color: "white" }}>
             <h3>ESTAS PAGANDO A</h3>
-            <p style={{ color: 'grey' }}>Nicolás Saporiti</p>
+            <p style={{ color: "grey" }}>Nicolás Saporiti</p>
             <h3>CON LIGHTNING NETWORK</h3>
-            <h5 style={{ fontSize: '15px' }}>
+            <Divider horizontal inverted>
+              <Dropdown
+                options={state.currencies}
+                placeholder="Moneda"
+                scrolling
+                search
+                style={{ color: "white" }}
+                onChange={handleCurrency}
+              />
+            </Divider>
+            <h5 style={{ fontSize: "15px" }}>
               {state.btc_price === 0
-                ? ''
-                : `Precio actual Bitcoin: CLP ${state.btc_price.toLocaleString(
-                    'es-CL'
-                  )}`}
+                ? ""
+                : `Precio actual Bitcoin: ${
+                    state.currency
+                  } ${state.btc_price.toLocaleString("es-CL")}`}
             </h5>
-            <p style={{ fontSize: '12px' }}>
+            <p style={{ fontSize: "12px", marginTop: "15px" }}>
               <a
                 href="https://www.coingecko.com/"
                 target="_blank"
@@ -183,25 +224,28 @@ const PayForm = () => {
               </a>
             </p>
           </Header>
-          <Form inverted style={{ margin: '8px' }} onSubmit={onSubmit}>
-            <Header textAlign="right" style={{ marginTop: '25px' }}>
-              <Checkbox label="Valores en CLP" onChange={handleCheck} />
+          <Form inverted style={{ margin: "8px" }} onSubmit={onSubmit}>
+            <Header textAlign="right" style={{ marginTop: "25px" }}>
+              <Checkbox
+                label={`Monto a transferir en ${state.currency}`}
+                onChange={handleCheck}
+              />
             </Header>
             <Form.Field>
               <label>
-                MONTO A TRANSFERIR{' '}
-                <span style={{ color: 'grey', marginLeft: '10px' }}>
-                  {sats_to_clp === '0' || isNaN(state.amount)
-                    ? ''
-                    : `Valor en CLP ${sats_to_clp}`}
+                MONTO A TRANSFERIR{" "}
+                <span style={{ color: "grey", marginLeft: "10px" }}>
+                  {sats_to_clp === "0" || isNaN(state.amount)
+                    ? ""
+                    : `Valor en ${state.currency} ${sats_to_clp}`}
                 </span>
               </label>
               <Input
                 labelPosition="right"
                 placeholder={
                   state.checked
-                    ? 'Ingresar valores en CLP'
-                    : 'Ingresar valores en SAT'
+                    ? `Ingresar valores en ${state.currency}`
+                    : "Ingresar valores en SAT"
                 }
                 type="number"
                 min={1}
@@ -210,9 +254,9 @@ const PayForm = () => {
               >
                 <input />
                 <Label>
-                  {state.amount === '' || isNaN(state.amount)
-                    ? 'SAT 0'
-                    : `SAT ${state.amount.toLocaleString('es-CL')}`}
+                  {state.amount === "" || isNaN(state.amount)
+                    ? "SAT 0"
+                    : `SAT ${state.amount.toLocaleString("es-CL")}`}
                 </Label>
               </Input>
             </Form.Field>
@@ -237,8 +281,8 @@ const PayForm = () => {
                   animated="vertical"
                   color="yellow"
                   fluid
-                  style={{ color: 'black' }}
-                  disabled={state.amount === 0 || state.message === ''}
+                  style={{ color: "black" }}
+                  disabled={state.amount === 0 || state.message === ""}
                 >
                   <Button.Content visible>ENVIAR</Button.Content>
                   <Button.Content hidden>⚡</Button.Content>
@@ -246,7 +290,7 @@ const PayForm = () => {
               }
             >
               <Modal.Content>
-                <QrModal data={state} handleCopy={setState}/>
+                <QrModal data={state} handleCopy={setState} />
               </Modal.Content>
 
               <Container textAlign="center"></Container>
