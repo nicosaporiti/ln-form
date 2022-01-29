@@ -32,7 +32,7 @@ const PayForm = () => {
     checked: false,
     currencies: [],
     currency: "clp",
-    url: ""
+    url: "",
   });
 
   const queryParams = new URLSearchParams(window.location.search);
@@ -62,7 +62,14 @@ const PayForm = () => {
         })
         .then((amt) => {
           getInvoice(amt, queryMemo).then((invoice) => {
-            setState({ ...state, to: invoice });
+            setState({
+              ...state,
+              to: invoice,
+              amount: amt,
+              amount_clp: queryAmount,
+              message: queryMemo,
+              currency: queryCurrency,
+            });
           });
         })
         .catch((err) => {
@@ -169,7 +176,7 @@ const PayForm = () => {
         setState({
           ...state,
           btc_price: price,
-          currency: curr.toUpperCase(),
+          currency: curr,
           amount: "",
           message: "",
           amount_clp: "",
@@ -197,7 +204,7 @@ const PayForm = () => {
             <h3>ESTAS PAGANDO CON BITCOIN</h3>
             <h3>LIGHTNING NETWORK</h3>
             <p>⚡</p>
-            <p style={{color: "#fbbd08"}}>Selecciona una divisa</p>
+            <p style={{ color: "#fbbd08" }}>Selecciona una divisa</p>
             <Divider horizontal inverted>
               <Dropdown
                 options={state.currencies}
@@ -211,9 +218,9 @@ const PayForm = () => {
             <h5 style={{ fontSize: "15px" }}>
               {state.btc_price === 0
                 ? ""
-                : `Precio actual Bitcoin: ${
-                    state.currency
-                  } ${state.btc_price.toLocaleString("es-CL")}`}
+                : `Precio actual Bitcoin: ${state.currency.toUpperCase()} ${state.btc_price.toLocaleString(
+                    "es-CL"
+                  )}`}
             </h5>
             <p style={{ fontSize: "12px", marginTop: "15px" }}>
               <a
@@ -229,7 +236,7 @@ const PayForm = () => {
           <Form inverted style={{ margin: "8px" }} onSubmit={onSubmit}>
             <Header textAlign="right" style={{ marginTop: "25px" }}>
               <Checkbox
-                label={`Transferir en ${state.currency}`}
+                label={`Transferir en ${state.currency.toLocaleUpperCase()}`}
                 onChange={handleCheck}
               />
             </Header>
@@ -298,7 +305,7 @@ const PayForm = () => {
               <Container textAlign="center"></Container>
             </Modal>
           </Form>
-          <PaymentLink data={state} handleCopy={setState}/>
+          <PaymentLink data={state} handleCopy={setState} />
         </Grid.Column>
       </Grid>
     </Container>

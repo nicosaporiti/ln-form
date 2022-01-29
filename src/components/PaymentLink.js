@@ -5,12 +5,9 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 export const PaymentLink = ({ data, handleCopy }) => {
   const state = data;
   const setState = handleCopy;
-  const { amount, message, currency, amount_clp, checked, url } = state;
+  const { amount, message, currency, amount_clp, checked } = state;
   const localUrl = window.location.origin;
 
-  console.log(state);
-
-  console.log(url);
   return (
     <>
       <hr></hr>
