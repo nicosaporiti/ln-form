@@ -19,6 +19,7 @@ import { getCurencies } from "./../helpers/getCurrencies";
 import "./payform.css";
 import { getPaymentStatus } from "../helpers/getPaymentStatus";
 import { QrModal } from "./QrModal";
+import { PaymentLink } from "./PaymentLink";
 
 const PayForm = () => {
   const [state, setState] = useState({
@@ -31,6 +32,7 @@ const PayForm = () => {
     checked: false,
     currencies: [],
     currency: "clp",
+    url: ""
   });
 
   const queryParams = new URLSearchParams(window.location.search);
@@ -38,8 +40,6 @@ const PayForm = () => {
   const queryAmount = parseInt(queryParams.get("amount"));
   const queryMemo = queryParams.get("memo");
   const queryCurrency = queryParams.get("curr");
-
-  console.log(state);
 
   useEffect(() => {
     Promise.all([getBtcPrice(state.currency), getCurencies()])
@@ -194,9 +194,10 @@ const PayForm = () => {
       >
         <Grid.Column color="black" style={{ maxWidth: 450 }}>
           <Header textAlign="center" style={{ color: "white" }}>
-            <h3>ESTAS PAGANDO A</h3>
-            <p style={{ color: "grey" }}>Nicolás Saporiti</p>
-            <h3>CON LIGHTNING NETWORK</h3>
+            <h3>ESTAS PAGANDO CON BITCOIN</h3>
+            <h3>LIGHTNING NETWORK</h3>
+            <p>⚡</p>
+            <p style={{color: "#fbbd08"}}>Selecciona una divisa</p>
             <Divider horizontal inverted>
               <Dropdown
                 options={state.currencies}
@@ -223,11 +224,12 @@ const PayForm = () => {
                 Fuente CoinGecko
               </a>
             </p>
+            <hr></hr>
           </Header>
           <Form inverted style={{ margin: "8px" }} onSubmit={onSubmit}>
             <Header textAlign="right" style={{ marginTop: "25px" }}>
               <Checkbox
-                label={`Monto a transferir en ${state.currency}`}
+                label={`Transferir en ${state.currency}`}
                 onChange={handleCheck}
               />
             </Header>
@@ -296,6 +298,7 @@ const PayForm = () => {
               <Container textAlign="center"></Container>
             </Modal>
           </Form>
+          <PaymentLink data={state} handleCopy={setState}/>
         </Grid.Column>
       </Grid>
     </Container>

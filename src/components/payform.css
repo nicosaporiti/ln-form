@@ -41,3 +41,14 @@ label {
 .open {
     margin-top: 50px !important;
 }
+
+div.divider.text {
+    color: #fbbd08;
+}
+
+hr {
+    margin-top: 15px;
+    height: 1px;
+    border: 0;
+    background-color: #3a3b3c;
+}
