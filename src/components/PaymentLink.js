@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "semantic-ui-react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
+import { encode } from "../utils/base64"
 
 export const PaymentLink = ({ data, handleCopy }) => {
   const state = data;
@@ -14,8 +15,8 @@ export const PaymentLink = ({ data, handleCopy }) => {
       <CopyToClipboard
         text={
           !checked
-            ? `${localUrl}/?amount=${amount}&memo=${message}&curr=sat`
-            : `${localUrl}/?amount=${amount_clp}&memo=${message}&curr=${currency}`
+            ? localUrl + "/?" + encode(`amount=${amount}&memo=${message}&curr=sat`)
+            : localUrl + "/?" + encode(`amount=${amount_clp}&memo=${message}&curr=${currency}`)
         }
         onCopy={() => setState({ ...state, copied: true })}
       >

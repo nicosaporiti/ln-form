@@ -20,6 +20,7 @@ import "./payform.css";
 import { getPaymentStatus } from "../helpers/getPaymentStatus";
 import { QrModal } from "./QrModal";
 import { PaymentLink } from "./PaymentLink";
+import { decode } from "../utils/base64";
 
 const PayForm = () => {
   const [state, setState] = useState({
@@ -35,11 +36,18 @@ const PayForm = () => {
     url: "",
   });
 
-  const queryParams = new URLSearchParams(window.location.search);
+  /* Search Params and decode Base64 */
+  
+  const getSearch = window.location.search;
+  const search = getSearch === "" ? "" : getSearch.split("?");
+  const decodeSearch = !search ? "" : "?" + decode(search[1]);
+  const queryParams = new URLSearchParams(decodeSearch);
 
   const queryAmount = parseInt(queryParams.get("amount"));
   const queryMemo = queryParams.get("memo");
   const queryCurrency = queryParams.get("curr");
+
+/* End Search Params */
 
   useEffect(() => {
     Promise.all([getBtcPrice(state.currency), getCurencies()])
