@@ -29,7 +29,22 @@ export const QrModal = ({ data, handleCopy }) => {
       {state.to === "" ? (
         ""
       ) : (
-        <QRcode value={state.to} size={250} renderAs="svg" />
+        <QRcode
+          value={state.to}
+          includeMargin={true}
+          size={250}
+          renderAs="svg"
+          fgColor="#fbbd08"
+          bgColor={"#303135"}
+          imageSettings={{
+            src: "https://i.imgur.com/gsrT4AZ.png",
+            x: null,
+            y: null,
+            height: 48,
+            width: 48,
+            excavate: true,
+          }}
+        />
       )}
       <Container style={{ marginTop: "10px" }}>
         <CopyToClipboard
