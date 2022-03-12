@@ -98,6 +98,7 @@ const PayForm = () => {
                 showConfirmButton: false,
                 timer: 6000,
               });
+              setState({...state, to: "", amount: "", amount_clp: "", message: "", url: ""});
               return clearInterval(interval);
             }
           })
@@ -302,6 +303,7 @@ const PayForm = () => {
                   <Button.Content hidden>⚡</Button.Content>
                 </Button>
               }
+              open={state.to !== ""}
             >
               <Modal.Content>
                 <QrModal data={state} handleCopy={setState} />
