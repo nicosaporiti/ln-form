@@ -37,14 +37,14 @@ const PayForm = () => {
   });
 
   /* Search Params and decode Base64 */
-  
+
   const queryParams = getQueryParams(window.location.search);
 
   const queryAmount = parseInt(queryParams.get("amount"));
   const queryMemo = queryParams.get("memo");
   const queryCurrency = queryParams.get("curr");
 
-/* End Search Params */
+  /* End Search Params */
 
   useEffect(() => {
     Promise.all([getBtcPrice(state.currency), getCurencies()])
@@ -98,6 +98,9 @@ const PayForm = () => {
                 showConfirmButton: false,
                 timer: 6000,
               });
+              setTimeout(() => {
+                window.location.href = "https://payments.saporiti.cl/";
+              }, 6100);
               return clearInterval(interval);
             }
           })
