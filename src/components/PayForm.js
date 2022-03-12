@@ -98,7 +98,6 @@ const PayForm = () => {
                 showConfirmButton: false,
                 timer: 6000,
               });
-              setState({...state, to: "", amount: "", amount_clp: "", message: "", url: ""});
               return clearInterval(interval);
             }
           })
