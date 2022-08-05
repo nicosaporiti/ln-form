@@ -116,7 +116,7 @@ const PayForm = () => {
           });
       }
     }, 5000);
-  });
+  },[state.amount, state.to]);
 
   const handleChange = (event) => {
     event.preventDefault();
