@@ -11,6 +11,7 @@ import {
   Checkbox,
   Dropdown,
   Divider,
+  Icon,
 } from 'semantic-ui-react';
 import Swal from 'sweetalert2';
 import { getBtcPrice } from '../helpers/getBtcPrice';
@@ -86,18 +87,26 @@ const PayForm = () => {
   }, []);
 
   useEffect(() => {
+    const Toast = Swal.mixin({
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 6000,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer);
+        toast.addEventListener('mouseleave', Swal.resumeTimer);
+      },
+    });
     const interval = setInterval(() => {
       if (state.to !== '') {
         getPaymentStatus(state.to)
           .then((data) => {
             if (data) {
-              Swal.fire({
-                position: 'top-end',
+              Toast.fire({
                 icon: 'success',
                 title: 'Transferencia confirmada!',
                 text: `Pago por ${state.amount} sat procesado`,
-                showConfirmButton: false,
-                timer: 6000,
               });
               setTimeout(() => {
                 window.location.href = 'https://payments.saporiti.cl/';
@@ -106,17 +115,14 @@ const PayForm = () => {
             }
           })
           .catch((err) => {
-            Swal.fire({
-              position: 'top-end',
+            Toast.fire({
               icon: 'error',
               title: err,
-              showConfirmButton: false,
-              timer: 5000,
             });
           });
       }
     }, 5000);
-  },[state.amount, state.to]);
+  }, [state.amount, state.to]);
 
   const handleChange = (event) => {
     event.preventDefault();
@@ -300,8 +306,10 @@ const PayForm = () => {
                   style={{ color: 'black' }}
                   disabled={state.amount === 0 || state.message === ''}
                 >
-                  <Button.Content visible>ENVIAR</Button.Content>
-                  <Button.Content hidden>⚡</Button.Content>
+                  <Button.Content visible>GENERAR QR</Button.Content>
+                  <Button.Content hidden>
+                    <Icon name='lightning' />
+                  </Button.Content>
                 </Button>
               }
               open={state.to !== ''}
