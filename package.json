@@ -2,6 +2,9 @@
   "name": "ln-form",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "22.x"
+  },
   "dependencies": {
     "@sweetalert2/theme-dark": "^5.0.8",
     "@sweetalert2/themes": "^5.0.8",
