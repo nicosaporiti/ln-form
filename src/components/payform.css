@@ -1,54 +1,817 @@
+/* ===== Base Styles ===== */
+* {
+  box-sizing: border-box;
+}
+
 body {
-    background-color: #303135;
-}
-.input-lna input{
-    cursor: pointer !important;
-}
-
-a {
-    color:#806514
+  background: #0d0e1a;
+  min-height: 100vh;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-a:hover {
-    color:#fbbd08
+/* ===== Main Container ===== */
+.app-container {
+  min-height: 100vh;
+  max-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  max-width: 420px;
+  margin: 0 auto;
+  overflow: hidden;
 }
 
-label {
-    text-align: left;
+/* ===== Header ===== */
+.app-header {
+  text-align: center;
+  margin-bottom: 8px;
 }
 
-.black {
-    border-radius: 2%;
+.logo-container {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #f7931a 0%, #ffb347 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 8px;
+  box-shadow: 0 4px 20px rgba(247, 147, 26, 0.3);
 }
 
-.selection {
-    border-radius: 0% !important;
+.logo-container.profile-logo {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  padding: 2px;
+  overflow: hidden;
 }
 
-.ui.checkbox label {
-    color: #fbbd08 !important;
+.profile-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
-.ui.checkbox label::before {
-    background: #806514 !important;
-    border-color: #806514 !important;
+.logo-icon {
+  font-size: 28px;
+  color: #0d0e1a;
 }
 
-.ui.checked.checkbox label::after {
-    background: #fbbd08 !important;
+.app-title {
+  color: white;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 2px 0;
 }
 
-.open {
-    margin-top: 50px !important;
+.app-subtitle {
+  color: #6b7280;
+  font-size: 11px;
+  margin: 0;
 }
 
-div.divider.text {
-    color: #fbbd08;
+/* ===== Step Indicator ===== */
+.step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 10px;
+  width: 100%;
 }
 
-hr {
-    margin-top: 15px;
-    height: 1px;
-    border: 0;
-    background-color: #3a3b3c;
+.step-pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.step-pill.active {
+  background: linear-gradient(135deg, #f7931a 0%, #ffb347 100%);
+  color: #0d0e1a;
+  box-shadow: 0 2px 12px rgba(247, 147, 26, 0.3);
+}
+
+.step-pill.completed {
+  background: linear-gradient(135deg, #22c55e 0%, #4ade80 100%);
+  color: white;
+  box-shadow: 0 2px 12px rgba(34, 197, 94, 0.3);
+}
+
+.step-pill.inactive {
+  background: #1e2235;
+  color: #6b7280;
+  border: 1px solid #2d3348;
+}
+
+.step-connector {
+  width: 16px;
+  height: 2px;
+  background: #2d3348;
+  flex-shrink: 0;
+}
+
+.step-connector.completed {
+  background: linear-gradient(90deg, #22c55e, #22c55e);
+}
+
+/* ===== Card ===== */
+.card {
+  background: #1a1d2e;
+  border: 1px solid #2d3348;
+  border-radius: 14px;
+  padding: 14px;
+  width: 100%;
+}
+
+/* ===== Form Elements ===== */
+.form-group {
+  margin-bottom: 14px;
+}
+
+.form-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.form-label {
+  color: #e5e7eb;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+}
+
+.conversion-hint {
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.form-textarea {
+  width: 100%;
+  min-height: 60px;
+  padding: 10px 4px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #2d3348;
+  border-radius: 0;
+  color: white;
+  font-size: 14px;
+  resize: none;
+  transition: border-color 0.2s;
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-bottom-color: #f7931a;
+}
+
+.form-textarea::placeholder {
+  color: #4b5563;
+}
+
+.char-counter {
+  text-align: right;
+  color: #6b7280;
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+.form-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px;
+  padding-right: 90px;
+  background: #0d0e1a;
+  border: 1px solid #2d3348;
+  border-radius: 10px;
+  color: white;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #f7931a;
+}
+
+.form-input::placeholder {
+  color: #6b7280;
+}
+
+.currency-toggle {
+  position: absolute;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  background: #2d3348;
+  border-radius: 6px;
+  color: #f7931a;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.currency-toggle:hover {
+  background: #3d4358;
+}
+
+.currency-toggle svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ===== Buttons ===== */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #b8860b 0%, #d4a017 100%);
+  color: #0d0e1a;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #d4a017 0%, #f7931a 100%);
+  transform: translateY(-1px);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: #1e2235;
+  color: white;
+  border: 1px solid #2d3348;
+}
+
+.btn-secondary:hover {
+  background: #2d3348;
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #f7931a 0%, #ffb347 100%);
+  color: #0d0e1a;
+}
+
+/* ===== QR Code Container ===== */
+.qr-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.qr-wrapper {
+  background: white;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+/* ===== Info Card ===== */
+.info-card {
+  background: #0d0e1a;
+  border: 1px solid #2d3348;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+}
+
+.info-row:not(:last-child) {
+  border-bottom: 1px solid #2d3348;
+}
+
+.info-label {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.info-value {
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.info-value.highlight {
+  color: #f7931a;
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.fiat-equivalent {
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+/* ===== Invoice Display ===== */
+.invoice-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #0d0e1a;
+  border: 1px solid #2d3348;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+}
+
+.invoice-text {
+  flex: 1;
+  color: #6b7280;
+  font-family: 'Monaco', 'Consolas', monospace;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.copy-btn {
+  background: transparent;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 8px;
+  transition: color 0.2s;
+}
+
+.copy-btn:hover {
+  color: #f7931a;
+}
+
+/* ===== Status Message ===== */
+.status-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #6b7280;
+  font-size: 12px;
+  margin-bottom: 8px;
+  padding: 4px 0;
+}
+
+.status-message svg {
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ===== Button Group ===== */
+.btn-group {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-group .btn {
+  flex: 1;
+}
+
+/* ===== Success Screen ===== */
+.success-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 16px;
+  position: relative;
+}
+
+.success-circle {
+  width: 100%;
+  height: 100%;
+  border: 4px solid #22c55e;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: scaleIn 0.5s ease-out;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.success-check {
+  color: #22c55e;
+  font-size: 36px;
+}
+
+.success-title {
+  color: white;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+  text-align: center;
+}
+
+.success-subtitle {
+  color: #6b7280;
+  font-size: 13px;
+  margin: 0 0 16px 0;
+  text-align: center;
+}
+
+.success-card {
+  background: #1a3a2e;
+  border: 1px solid #22c55e33;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 0;
+  text-align: center;
+}
+
+.success-amount {
+  color: #22c55e;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.success-detail {
+  padding: 8px 0;
+  border-top: 1px solid #22c55e33;
+}
+
+.success-detail-label {
+  color: #6b7280;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.success-detail-value {
+  color: white;
+  font-size: 14px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #22c55e22;
+  color: #22c55e;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  background: #22c55e;
+  border-radius: 50%;
+}
+
+/* ===== Mobile Responsive ===== */
+@media (max-width: 480px) {
+  .app-container {
+    padding: 16px;
+  }
+
+  .step-pill {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .step-pill span:last-child {
+    display: none;
+  }
+
+  .step-connector {
+    width: 20px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .logo-container {
+    width: 56px;
+    height: 56px;
+  }
+
+  .logo-icon {
+    font-size: 28px;
+  }
+
+  .app-title {
+    font-size: 22px;
+  }
+
+  .btn-group {
+    flex-direction: column;
+  }
+
+  .success-amount {
+    font-size: 24px;
+  }
+}
+
+/* ===== Currency Selector ===== */
+.currency-selector {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+/* ===== Currency Dropdown ===== */
+.currency-title {
+  text-align: center !important;
+  color: #f7931a !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  margin-bottom: 16px !important;
+}
+
+.currency-dropdown-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.currency-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #1e2235;
+  border: none;
+  border-radius: 8px;
+  color: #9ca3af;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 100px;
+}
+
+.currency-dropdown-trigger:hover {
+  color: #e5e7eb;
+  background: #2d3348;
+}
+
+.dropdown-arrow {
+  transition: transform 0.2s;
+}
+
+.dropdown-arrow.open {
+  transform: rotate(180deg);
+}
+
+.currency-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 8px;
+  background: #1a1d2e;
+  border: 1px solid #2d3348;
+  border-radius: 12px;
+  overflow: hidden;
+  min-width: 140px;
+  z-index: 100;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.currency-dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 12px 24px;
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.currency-dropdown-item:hover {
+  background: #2d3348;
+  color: #f7931a;
+}
+
+.currency-dropdown-item.active {
+  background: linear-gradient(135deg, #f7931a 0%, #ffb347 100%);
+  color: #0d0e1a;
+}
+
+/* ===== Input Mode Toggle (SATS / Fiat) ===== */
+.input-mode-toggle {
+  display: flex;
+  background: #0d0e1a;
+  border: 1px solid #2d3348;
+  border-radius: 8px;
+  padding: 3px;
+  margin-bottom: 10px;
+}
+
+.mode-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: transparent;
+  color: #6b7280;
+}
+
+.mode-btn:hover:not(.active) {
+  color: #9ca3af;
+}
+
+.mode-btn.active {
+  background: linear-gradient(135deg, #f7931a 0%, #ffb347 100%);
+  color: #0d0e1a;
+  box-shadow: 0 2px 8px rgba(247, 147, 26, 0.3);
+}
+
+.currency-chip {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid #2d3348;
+  background: #1e2235;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.currency-chip:hover {
+  border-color: #f7931a;
+  color: #f7931a;
+}
+
+.currency-chip.active {
+  background: linear-gradient(135deg, #f7931a 0%, #ffb347 100%);
+  color: #0d0e1a;
+  border-color: transparent;
+}
+
+.currency-chip.sats {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ===== Payment Link Button ===== */
+.payment-link-section {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #2d3348;
+}
+
+.btn-link {
+  background: transparent;
+  border: 1px solid #2d3348;
+  color: #6b7280;
+  padding: 10px 14px;
+  font-size: 13px;
+}
+
+.btn-link:hover {
+  border-color: #f7931a;
+  color: #f7931a;
+  background: transparent;
+}
+
+/* ===== BTC Price Display ===== */
+.btc-price {
+  text-align: center;
+  color: #e5e7eb;
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  padding: 8px;
+  background: transparent;
+  line-height: 1.6;
+}
+
+.btc-price a {
+  color: #f7931a;
+  text-decoration: none;
+  font-size: 11px;
+}
+
+.btc-price a:hover {
+  text-decoration: underline;
+}
+
+/* ===== Loading Screen ===== */
+.loading-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}
+
+.loading-container {
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 60px;
+  height: 60px;
+  border: 3px solid #2d3348;
+  border-top-color: #f7931a;
+  border-radius: 50%;
+  margin: 0 auto 20px;
+  animation: spin 1s linear infinite;
+}
+
+.loading-text {
+  color: #f7931a;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.loading-subtext {
+  color: #6b7280;
+  font-size: 13px;
+  margin: 0;
+}
+
+/* ===== Semantic UI Overrides ===== */
+.ui.grid {
+  margin: 0 !important;
+}
+
+.ui.container {
+  width: 100% !important;
+  max-width: 500px !important;
+}
+
+/* Hide default Semantic UI steps */
+.ui.steps {
+  display: none !important;
 }

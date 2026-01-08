@@ -1,330 +1,211 @@
-import React, { useEffect, useState } from 'react';
-import {
-  Container,
-  Grid,
-  Form,
-  Button,
-  Modal,
-  Input,
-  Label,
-  Header,
-  Checkbox,
-  Dropdown,
-  Divider,
-  Icon,
-} from 'semantic-ui-react';
-import Swal from 'sweetalert2';
+import React, { useEffect, useReducer, useState, useCallback } from 'react';
 import { getBtcPrice } from '../helpers/getBtcPrice';
 import { getInvoice } from '../helpers/getInvoice';
 import { getCurencies } from './../helpers/getCurrencies';
-import './payform.css';
-import { getPaymentStatus } from '../helpers/getPaymentStatus';
-import { QrModal } from './QrModal';
-import { PaymentLink } from './PaymentLink';
 import { getQueryParams } from '../utils/base64';
-import Profile from './Profile';
+import { paymentReducer, initialState, actionTypes } from '../reducers/paymentReducer';
+import StepIndicator from './steps/StepIndicator';
+import Step1DataForm from './steps/Step1DataForm';
+import Step2QRInvoice from './steps/Step2QRInvoice';
+import Step3Confirmation from './steps/Step3Confirmation';
+import logo from '../assets/logo512.png';
+import './payform.css';
 
 const PayForm = () => {
-  const [state, setState] = useState({
-    amount: '',
-    amount_clp: '',
-    message: '',
-    to: '',
-    copied: false,
-    btc_price: 0,
-    checked: false,
-    currencies: [],
-    currency: 'clp',
-    url: '',
-  });
+  const [state, dispatch] = useReducer(paymentReducer, initialState);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [isLoadingDeepLink, setIsLoadingDeepLink] = useState(false);
 
-  /* Search Params and decode Base64 */
-
+  // Parsear query params para deep linking
   const queryParams = getQueryParams(window.location.search);
-
   const queryAmount = parseInt(queryParams.get('amount'));
   const queryMemo = queryParams.get('memo');
   const queryCurrency = queryParams.get('curr');
+  const hasDeepLinkParams = !!(queryAmount && queryMemo && queryCurrency);
 
-  /* End Search Params */
-
+  // Inicialización: cargar precio BTC y monedas disponibles
   useEffect(() => {
-    Promise.all([getBtcPrice(state.currency), getCurencies()])
-      .then((values) => {
-        setState({ ...state, btc_price: values[0], currencies: values[1] });
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (queryAmount && queryMemo && queryCurrency) {
-      getBtcPrice(queryCurrency)
-        .then((data) => {
-          return queryCurrency === 'sat'
-            ? queryAmount
-            : parseInt((queryAmount / data) * 100000000);
-        })
-        .then((amt) => {
-          getInvoice(amt, queryMemo).then((invoice) => {
-            setState({
-              ...state,
-              to: invoice,
-              amount: amt,
-              amount_clp: queryAmount,
-              message: queryMemo,
-              currency: queryCurrency,
-            });
+    if (!hasDeepLinkParams) {
+      Promise.all([getBtcPrice(state.currency), getCurencies()])
+        .then(([btcPrice, currencies]) => {
+          dispatch({
+            type: actionTypes.SET_INITIAL_DATA,
+            payload: { btc_price: btcPrice, currencies },
           });
         })
         .catch((err) => {
-          console.log(err);
+          console.error('Error initializing app:', err);
         });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Deep Linking: si hay params en la URL, generar invoice directamente
   useEffect(() => {
-    const Toast = Swal.mixin({
-      toast: true,
-      position: 'top-end',
-      showConfirmButton: false,
-      timer: 6000,
-      timerProgressBar: true,
-      didOpen: (toast) => {
-        toast.addEventListener('mouseenter', Swal.stopTimer);
-        toast.addEventListener('mouseleave', Swal.resumeTimer);
-      },
-    });
-    const interval = setInterval(() => {
-      if (state.to !== '') {
-        getPaymentStatus(state.to)
-          .then((data) => {
-            if (data) {
-              Toast.fire({
-                icon: 'success',
-                title: 'Transferencia confirmada!',
-                text: `Pago por ${state.amount} sat procesado`,
-              });
-              setTimeout(() => {
-                window.location.href = 'https://payments.saporiti.cl/';
-              }, 6100);
-              return clearInterval(interval);
-            }
-          })
-          .catch((err) => {
-            Toast.fire({
-              icon: 'error',
-              title: err,
-            });
-          });
-      }
-    }, 5000);
-  }, [state.amount, state.to]);
-
-  const handleChange = (event) => {
-    event.preventDefault();
-    const value = event.target.value;
-    if (!isNaN(value) && !state.checked)
-      setState({
-        ...state,
-        amount: Number.parseInt(value),
-      });
-    else {
-      setState({
-        ...state,
-        amount: Number.parseInt((value / state.btc_price) * 100000000),
-        amount_clp: Number.parseInt(value),
-      });
+    if (hasDeepLinkParams) {
+      setIsLoadingDeepLink(true);
+      handleDeepLink();
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const onSubmit = (event) => {
-    event.preventDefault();
-    const a = Number(state.amount);
-    const m = state.message;
-    getInvoice(a, m)
-      .then((data) => {
-        setState({ ...state, to: data });
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-    setState({
-      ...state,
-      amount: '',
-      message: '',
-      to: '',
-      hidden: true,
-    });
-  };
+  const handleDeepLink = async () => {
+    try {
+      const price = await getBtcPrice(queryCurrency);
+      const amountInSats =
+        queryCurrency === 'sat'
+          ? queryAmount
+          : parseInt((queryAmount / price) * 100000000);
 
-  const handleCheck = () => {
-    if (state.checked) {
-      setState({
-        ...state,
-        amount: '',
-        message: '',
-        amount_clp: '',
-        checked: false,
-      });
-    } else {
-      setState({
-        ...state,
-        amount: '',
-        message: '',
-        amount_clp: '',
-        checked: true,
-      });
-    }
-  };
+      const invoice = await getInvoice(amountInSats, queryMemo);
 
-  const handleCurrency = (e, data) => {
-    e.preventDefault();
-    const indx = data.value;
-    const curr = data.options[indx].text;
-
-    getBtcPrice(curr)
-      .then((price) =>
-        setState({
-          ...state,
+      dispatch({
+        type: actionTypes.SET_DEEP_LINK_DATA,
+        payload: {
+          amount: amountInSats,
+          amount_clp: queryAmount,
+          message: queryMemo,
+          currency: queryCurrency,
+          invoice: invoice,
           btc_price: price,
-          currency: curr,
-          amount: '',
-          message: '',
-          amount_clp: '',
-        })
-      )
-      .catch((err) => console.log(err));
+        },
+      });
+
+      setIsLoadingDeepLink(false);
+      setCurrentStep(2);
+    } catch (err) {
+      console.error('Deep link error:', err);
+      setIsLoadingDeepLink(false);
+      const [btcPrice, currencies] = await Promise.all([
+        getBtcPrice('clp'),
+        getCurencies(),
+      ]);
+      dispatch({
+        type: actionTypes.SET_INITIAL_DATA,
+        payload: { btc_price: btcPrice, currencies },
+      });
+    }
   };
 
-  const sats_to_clp = Math.ceil(
-    (state.btc_price / 100000000) * state.amount
-  ).toLocaleString('es-CL');
+  // Manejar cambio de moneda
+  const handleCurrencyChange = useCallback(
+    async (e, data) => {
+      e.preventDefault();
+      const indx = data.value;
+      const curr = data.options[indx].text;
 
-  return queryAmount && queryMemo ? (
-    <QrModal data={state} handleCopy={setState} />
-  ) : (
-    <Container>
-      <Grid
-        textAlign='center'
-        style={{ height: '100vh' }}
-        verticalAlign='middle'
-        stackable
-      >
-        <Grid.Column color='black' style={{ maxWidth: 450 }}>
-          <Header textAlign='center' style={{ color: 'white' }}>
-            <Profile />
-            <p style={{ color: '#fbbd08' }}>Selecciona una divisa</p>
-            <Divider horizontal inverted>
-              <Dropdown
-                options={state.currencies}
-                placeholder='Moneda'
-                scrolling
-                search
-                style={{ color: 'white' }}
-                onChange={handleCurrency}
-              />
-            </Divider>
-            <h5 style={{ fontSize: '15px' }}>
-              {state.btc_price === 0
-                ? ''
-                : `Precio actual Bitcoin: ${state.currency.toUpperCase()} ${state.btc_price.toLocaleString(
-                    'es-CL'
-                  )}`}
-            </h5>
-            <p style={{ fontSize: '12px', marginTop: '15px' }}>
-              <a
-                href='https://www.coingecko.com/'
-                target='_blank'
-                rel='noreferrer'
-              >
-                Fuente CoinGecko
-              </a>
-            </p>
-            <hr></hr>
-          </Header>
-          <Form inverted style={{ margin: '8px' }} onSubmit={onSubmit}>
-            <Header textAlign='right' style={{ marginTop: '25px' }}>
-              <Checkbox
-                label={`Transferir en ${state.currency.toLocaleUpperCase()}`}
-                onChange={handleCheck}
-              />
-            </Header>
-            <Form.Field>
-              <label>
-                MONTO A TRANSFERIR{' '}
-                <span style={{ color: 'grey', marginLeft: '10px' }}>
-                  {sats_to_clp === '0' || isNaN(state.amount)
-                    ? ''
-                    : `Valor en ${state.currency} ${sats_to_clp}`}
-                </span>
-              </label>
-              <Input
-                labelPosition='right'
-                placeholder={
-                  state.checked
-                    ? `Ingresar valores en ${state.currency}`
-                    : 'Ingresar valores en SAT'
-                }
-                type='number'
-                min={1}
-                onChange={handleChange}
-                value={state.checked ? state.amount_clp : state.amount}
-              >
-                <input />
-                <Label>
-                  {state.amount === '' || isNaN(state.amount)
-                    ? 'SAT 0'
-                    : `SAT ${state.amount.toLocaleString('es-CL')}`}
-                </Label>
-              </Input>
-            </Form.Field>
-            <Form.Field>
-              <label>MENSAJE</label>
-              <input
-                placeholder='ingresar un comentario'
-                onChange={(event) =>
-                  setState({ ...state, message: event.target.value })
-                }
-                value={state.message}
-              ></input>
-            </Form.Field>
+      try {
+        const price = await getBtcPrice(curr);
+        dispatch({
+          type: actionTypes.SET_CURRENCY,
+          payload: { currency: curr, btc_price: price },
+        });
+      } catch (err) {
+        console.error('Error changing currency:', err);
+      }
+    },
+    []
+  );
 
-            <Modal
-              basic
-              centered={false}
-              onClose={() => window.location.reload()}
-              trigger={
-                <Button
-                  type='submit'
-                  animated='vertical'
-                  color='yellow'
-                  fluid
-                  style={{ color: 'black' }}
-                  disabled={state.amount === 0 || state.message === ''}
-                >
-                  <Button.Content visible>GENERAR QR</Button.Content>
-                  <Button.Content hidden>
-                    <Icon name='lightning' />
-                  </Button.Content>
-                </Button>
-              }
-              open={state.to !== ''}
-            >
-              <Modal.Content>
-                <QrModal data={state} handleCopy={setState} />
-              </Modal.Content>
+  // Avanzar de Step 1 a Step 2: generar invoice
+  const handleAdvanceToStep2 = useCallback(async () => {
+    if (state.amount > 0 && state.message.trim() !== '') {
+      dispatch({ type: actionTypes.SET_LOADING, payload: true });
 
-              <Container textAlign='center'></Container>
-            </Modal>
-          </Form>
-          <PaymentLink data={state} handleCopy={setState} />
-        </Grid.Column>
-      </Grid>
-    </Container>
+      try {
+        const invoice = await getInvoice(state.amount, state.message);
+        dispatch({ type: actionTypes.GENERATE_INVOICE, payload: invoice });
+        setCurrentStep(2);
+      } catch (err) {
+        console.error('Error generating invoice:', err);
+        dispatch({ type: actionTypes.SET_LOADING, payload: false });
+      }
+    }
+  }, [state.amount, state.message]);
+
+  // Volver de Step 2 a Step 1
+  const handleBackToStep1 = useCallback(() => {
+    dispatch({ type: actionTypes.RESET });
+    setCurrentStep(1);
+  }, []);
+
+  // Callback cuando se confirma el pago
+  const handlePaymentConfirmed = useCallback(() => {
+    dispatch({ type: actionTypes.CONFIRM_PAYMENT });
+    setCurrentStep(3);
+  }, []);
+
+  // Reset para volver a Step 1
+  const handleReset = useCallback(() => {
+    dispatch({ type: actionTypes.RESET });
+    setCurrentStep(1);
+    if (hasDeepLinkParams) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [hasDeepLinkParams]);
+
+  // Renderizar el step actual
+  const renderCurrentStep = () => {
+    // Mostrar pantalla de carga para deep links
+    if (isLoadingDeepLink) {
+      return (
+        <div className="card loading-card">
+          <div className="loading-container">
+            <div className="loading-spinner"></div>
+            <p className="loading-text">Generando Invoice...</p>
+            <p className="loading-subtext">Conectando con Lightning Network</p>
+          </div>
+        </div>
+      );
+    }
+
+    switch (currentStep) {
+      case 1:
+        return (
+          <Step1DataForm
+            state={state}
+            dispatch={dispatch}
+            onAdvance={handleAdvanceToStep2}
+            onCurrencyChange={handleCurrencyChange}
+            isLoading={state.isLoading}
+          />
+        );
+      case 2:
+        return (
+          <Step2QRInvoice
+            state={state}
+            dispatch={dispatch}
+            onPaymentConfirmed={handlePaymentConfirmed}
+            onBack={!hasDeepLinkParams ? handleBackToStep1 : null}
+          />
+        );
+      case 3:
+        return <Step3Confirmation state={state} onReset={handleReset} />;
+      default:
+        return null;
+    }
+  };
+
+  const userImage = process.env.REACT_APP_API_USER_IMAGE || logo;
+  const userName = process.env.REACT_APP_API_USER || 'Lightning Invoice';
+
+  return (
+    <div className="app-container">
+      {/* Header */}
+      <header className="app-header">
+        <div className="logo-container profile-logo">
+          <img src={userImage} alt={userName} className="profile-image" />
+        </div>
+        <h1 className="app-title">{userName}</h1>
+        <p className="app-subtitle">Pagar con Bitcoin ⚡ Lightning Network</p>
+      </header>
+
+      {/* Step Indicator */}
+      <StepIndicator currentStep={currentStep} />
+
+      {/* Current Step Content */}
+      {renderCurrentStep()}
+    </div>
   );
 };
 
