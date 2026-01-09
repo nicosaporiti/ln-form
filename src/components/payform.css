@@ -31,8 +31,8 @@ body {
 }
 
 .logo-container {
-  width: 48px;
-  height: 48px;
+  width: clamp(40px, 10vw, 48px);
+  height: clamp(40px, 10vw, 48px);
   background: linear-gradient(135deg, #f7931a 0%, #ffb347 100%);
   border-radius: 12px;
   display: flex;
@@ -43,8 +43,8 @@ body {
 }
 
 .logo-container.profile-logo {
-  width: 52px;
-  height: 52px;
+  width: clamp(44px, 11vw, 52px);
+  height: clamp(44px, 11vw, 52px);
   border-radius: 50%;
   padding: 2px;
   overflow: hidden;
@@ -64,7 +64,7 @@ body {
 
 .app-title {
   color: white;
-  font-size: 18px;
+  font-size: clamp(16px, 4vw, 18px);
   font-weight: 700;
   margin: 0 0 2px 0;
 }
@@ -418,9 +418,9 @@ body {
 
 /* ===== Success Screen ===== */
 .success-icon {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto 16px;
+  width: clamp(60px, 18vw, 80px);
+  height: clamp(60px, 18vw, 80px);
+  margin: 0 auto clamp(12px, 3vw, 16px);
   position: relative;
 }
 
@@ -477,7 +477,7 @@ body {
 
 .success-amount {
   color: #22c55e;
-  font-size: 24px;
+  font-size: clamp(20px, 5vw, 24px);
   font-weight: 700;
   margin-bottom: 12px;
   display: flex;
@@ -524,12 +524,13 @@ body {
 /* ===== Mobile Responsive ===== */
 @media (max-width: 480px) {
   .app-container {
-    padding: 16px;
+    padding: 12px;
+    max-width: 100%;
   }
 
   .step-pill {
-    padding: 8px 12px;
-    font-size: 12px;
+    padding: 6px 10px;
+    font-size: 11px;
   }
 
   .step-pill span:last-child {
@@ -537,33 +538,226 @@ body {
   }
 
   .step-connector {
-    width: 20px;
+    width: 16px;
   }
 
   .card {
-    padding: 16px;
-  }
-
-  .logo-container {
-    width: 56px;
-    height: 56px;
-  }
-
-  .logo-icon {
-    font-size: 28px;
-  }
-
-  .app-title {
-    font-size: 22px;
+    padding: 12px;
   }
 
   .btn-group {
     flex-direction: column;
   }
+}
+
+/* ===== Very Small Screens ===== */
+@media (max-width: 360px) {
+  .app-container {
+    padding: 8px;
+  }
+
+  .card {
+    padding: 10px;
+  }
+
+  .form-input {
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .btn {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .step-pill {
+    padding: 5px 8px;
+    font-size: 10px;
+  }
+}
+
+/* ===== Landscape Mobile ===== */
+@media (orientation: landscape) and (max-height: 500px) {
+  .app-container {
+    max-height: none;
+    overflow-y: auto;
+    justify-content: flex-start;
+    padding: 12px;
+  }
+
+  .app-header {
+    margin-bottom: 2px;
+  }
+
+  .logo-container {
+    width: 28px;
+    height: 28px;
+    margin-bottom: 2px;
+    border-radius: 8px;
+  }
+
+  .logo-container.profile-logo {
+    width: 32px;
+    height: 32px;
+  }
+
+  .logo-icon {
+    font-size: 16px;
+  }
+
+  .app-title {
+    font-size: 14px;
+    margin-bottom: 0;
+  }
+
+  .app-subtitle {
+    display: none;
+  }
+
+  .step-indicator {
+    margin-bottom: 4px;
+  }
+
+  .step-pill {
+    padding: 3px 6px;
+    font-size: 9px;
+  }
+
+  .step-connector {
+    width: 10px;
+  }
+
+  .card {
+    padding: 8px;
+  }
+
+  .form-group {
+    margin-bottom: 6px;
+  }
+
+  .form-label {
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+
+  .form-textarea {
+    min-height: 36px;
+    padding: 6px 4px;
+    font-size: 12px;
+  }
+
+  .form-input {
+    padding: 8px;
+    padding-right: 70px;
+    font-size: 12px;
+  }
+
+  .currency-toggle {
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+
+  .input-mode-toggle {
+    margin-bottom: 6px;
+  }
+
+  .mode-btn {
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+
+  .btc-price {
+    font-size: 10px;
+    padding: 4px;
+    margin-bottom: 4px;
+  }
+
+  .btn {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .qr-container {
+    margin-bottom: 4px;
+  }
+
+  .qr-wrapper {
+    padding: 4px;
+  }
+
+  .qr-wrapper svg {
+    width: 80px !important;
+    height: 80px !important;
+  }
+
+  .info-card {
+    padding: 6px 8px;
+    margin-bottom: 4px;
+  }
+
+  .info-row {
+    padding: 3px 0;
+  }
+
+  .info-label,
+  .info-value {
+    font-size: 11px;
+  }
+
+  .invoice-display {
+    padding: 4px 8px;
+    margin-bottom: 4px;
+  }
+
+  .invoice-text {
+    font-size: 10px;
+  }
+
+  .status-message {
+    font-size: 10px;
+    margin-bottom: 4px;
+    padding: 2px 0;
+  }
+
+  .success-icon {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 6px;
+  }
+
+  .success-check {
+    font-size: 20px;
+  }
+
+  .success-title {
+    font-size: 14px;
+    margin-bottom: 2px;
+  }
+
+  .success-subtitle {
+    font-size: 10px;
+    margin-bottom: 8px;
+  }
+
+  .success-card {
+    padding: 8px;
+  }
 
   .success-amount {
-    font-size: 24px;
+    font-size: 16px;
+    margin-bottom: 6px;
   }
+
+  .char-counter {
+    font-size: 9px;
+    margin-top: 2px;
+  }
+}
+
+/* ===== QR Code Responsive ===== */
+.qr-wrapper svg {
+  width: clamp(100px, 35vmin, 140px) !important;
+  height: clamp(100px, 35vmin, 140px) !important;
 }
 
 /* ===== Currency Selector ===== */
