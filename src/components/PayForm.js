@@ -197,11 +197,13 @@ const PayForm = () => {
           <img src={userImage} alt={userName} className="profile-image" />
         </div>
         <h1 className="app-title">{userName}</h1>
-        <p className="app-subtitle">Pagar con Bitcoin ⚡ Lightning Network</p>
+        <p className="app-subtitle">
+          Pagar con Bitcoin <span className="subtitle-accent">⚡</span> Lightning Network
+        </p>
+        <div className="header-steps">
+          <StepIndicator currentStep={currentStep} />
+        </div>
       </header>
-
-      {/* Step Indicator */}
-      <StepIndicator currentStep={currentStep} />
 
       {/* Current Step Content */}
       {renderCurrentStep()}
