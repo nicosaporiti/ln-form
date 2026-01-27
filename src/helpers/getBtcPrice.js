@@ -1,13 +1,11 @@
-export const getBtcPrice = async (v) => {
-  const currency = v;
-  const url = `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=${currency}`;
+export const getBtcPrice = async (currency) => {
+  const url = `https://api.yadio.io/convert/1/BTC/${currency.toUpperCase()}`;
 
   try {
     const res = await fetch(url);
     if (!res.ok) throw new Error('API error');
     const data = await res.json();
-    const btcPrice = Number(data.bitcoin[currency]);
-    return btcPrice;
+    return Math.round(data.rate);
   } catch (error) {
     console.warn('Error fetching BTC price:', error.message);
     return 0;

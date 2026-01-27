@@ -15,6 +15,7 @@ const PayForm = () => {
   const [state, dispatch] = useReducer(paymentReducer, initialState);
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoadingDeepLink, setIsLoadingDeepLink] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   // Parsear query params para deep linking
   const queryParams = getQueryParams(window.location.search);
@@ -194,7 +195,20 @@ const PayForm = () => {
       {/* Header */}
       <header className="app-header">
         <div className="logo-container profile-logo">
-          <img src={userImage} alt={userName} className="profile-image" />
+          {!imageError ? (
+            <img
+              src={userImage}
+              alt={userName}
+              className="profile-image"
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <div className="profile-placeholder">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+              </svg>
+            </div>
+          )}
         </div>
         <h1 className="app-title">{userName}</h1>
         <p className="app-subtitle">

@@ -85,7 +85,6 @@ export const paymentReducer = (state, action) => {
         checked: !state.checked,
         amount: '',
         amount_clp: '',
-        message: '',
       };
 
     case actionTypes.SET_COPIED:
