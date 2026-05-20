@@ -31,6 +31,7 @@
     var(--muted-foreground) 50%,
     transparent
   );
+  --step-content-height: clamp(25rem, calc(100vh - 10.5rem), 31rem);
 }
 
 /* ===== Base ===== */
@@ -188,6 +189,19 @@ input {
 /* ===== Content ===== */
 .card-content {
   padding: 1.25rem;
+  height: var(--step-content-height);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.card-content > * {
+  width: 100%;
+}
+
+.card-content > .stack,
+.card-content > .loading-container,
+.card-content > .success {
+  min-height: 100%;
 }
 
 .stack {
@@ -474,6 +488,9 @@ input {
   margin: 0.25rem 0 0;
   font-size: 0.75rem;
   color: var(--muted-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .invoice-string {
@@ -551,9 +568,10 @@ input {
 
 /* ===== Success ===== */
 .success {
-  padding: 1.5rem 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 1rem;
 }
 
@@ -610,8 +628,9 @@ input {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 1rem;
-  padding: 2rem 0;
+  padding: 0;
 }
 
 .loading-spinner {
