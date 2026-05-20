@@ -76,7 +76,6 @@ export const paymentReducer = (state, action) => {
         btc_price: action.payload.btc_price,
         amount: '',
         amount_clp: '',
-        message: '',
       };
 
     case actionTypes.TOGGLE_CURRENCY_MODE:

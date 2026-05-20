@@ -3,13 +3,44 @@ import { getBtcPrice } from '../helpers/getBtcPrice';
 import { getInvoice } from '../helpers/getInvoice';
 import { getCurencies } from './../helpers/getCurrencies';
 import { getQueryParams } from '../utils/base64';
-import { paymentReducer, initialState, actionTypes } from '../reducers/paymentReducer';
+import {
+  paymentReducer,
+  initialState,
+  actionTypes,
+} from '../reducers/paymentReducer';
 import StepIndicator from './steps/StepIndicator';
 import Step1DataForm from './steps/Step1DataForm';
 import Step2QRInvoice from './steps/Step2QRInvoice';
 import Step3Confirmation from './steps/Step3Confirmation';
-import logo from '../assets/logo512.png';
 import './payform.css';
+
+const BoltIcon = ({ size = 10 }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+  </svg>
+);
+
+const DEFAULT_MEMO = 'Pago Lightning';
+
+const getInitials = (name) => {
+  if (!name) return '';
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join('');
+};
 
 const PayForm = () => {
   const [state, dispatch] = useReducer(paymentReducer, initialState);
@@ -17,14 +48,12 @@ const PayForm = () => {
   const [isLoadingDeepLink, setIsLoadingDeepLink] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  // Parsear query params para deep linking
   const queryParams = getQueryParams(window.location.search);
   const queryAmount = parseInt(queryParams.get('amount'));
-  const queryMemo = queryParams.get('memo');
+  const queryMemo = queryParams.get('memo') || '';
   const queryCurrency = queryParams.get('curr');
-  const hasDeepLinkParams = !!(queryAmount && queryMemo && queryCurrency);
+  const hasDeepLinkParams = !!(queryAmount && queryCurrency);
 
-  // Inicialización: cargar precio BTC y monedas disponibles
   useEffect(() => {
     if (!hasDeepLinkParams) {
       Promise.all([getBtcPrice(state.currency), getCurencies()])
@@ -41,7 +70,6 @@ const PayForm = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Deep Linking: si hay params en la URL, generar invoice directamente
   useEffect(() => {
     if (hasDeepLinkParams) {
       setIsLoadingDeepLink(true);
@@ -58,7 +86,7 @@ const PayForm = () => {
           ? queryAmount
           : parseInt((queryAmount / price) * 100000000);
 
-      const invoice = await getInvoice(amountInSats, queryMemo);
+      const invoice = await getInvoice(amountInSats, queryMemo || DEFAULT_MEMO);
 
       dispatch({
         type: actionTypes.SET_DEEP_LINK_DATA,
@@ -88,33 +116,24 @@ const PayForm = () => {
     }
   };
 
-  // Manejar cambio de moneda
-  const handleCurrencyChange = useCallback(
-    async (e, data) => {
-      e.preventDefault();
-      const indx = data.value;
-      const curr = data.options[indx].text;
+  const handleCurrencyChange = useCallback(async (currencyKey) => {
+    try {
+      const price = await getBtcPrice(currencyKey);
+      dispatch({
+        type: actionTypes.SET_CURRENCY,
+        payload: { currency: currencyKey, btc_price: price },
+      });
+    } catch (err) {
+      console.error('Error changing currency:', err);
+    }
+  }, []);
 
-      try {
-        const price = await getBtcPrice(curr);
-        dispatch({
-          type: actionTypes.SET_CURRENCY,
-          payload: { currency: curr, btc_price: price },
-        });
-      } catch (err) {
-        console.error('Error changing currency:', err);
-      }
-    },
-    []
-  );
-
-  // Avanzar de Step 1 a Step 2: generar invoice
   const handleAdvanceToStep2 = useCallback(async () => {
-    if (state.amount > 0 && state.message.trim() !== '') {
+    if (state.amount > 0) {
       dispatch({ type: actionTypes.SET_LOADING, payload: true });
 
       try {
-        const invoice = await getInvoice(state.amount, state.message);
+        const invoice = await getInvoice(state.amount, state.message || DEFAULT_MEMO);
         dispatch({ type: actionTypes.GENERATE_INVOICE, payload: invoice });
         setCurrentStep(2);
       } catch (err) {
@@ -124,38 +143,35 @@ const PayForm = () => {
     }
   }, [state.amount, state.message]);
 
-  // Volver de Step 2 a Step 1
   const handleBackToStep1 = useCallback(() => {
     dispatch({ type: actionTypes.RESET });
     setCurrentStep(1);
   }, []);
 
-  // Callback cuando se confirma el pago
   const handlePaymentConfirmed = useCallback(() => {
     dispatch({ type: actionTypes.CONFIRM_PAYMENT });
     setCurrentStep(3);
   }, []);
 
-  // Reset para volver a Step 1
   const handleReset = useCallback(() => {
     dispatch({ type: actionTypes.RESET });
     setCurrentStep(1);
     if (hasDeepLinkParams) {
-      window.history.replaceState({}, document.title, window.location.pathname);
+      window.history.replaceState(
+        {},
+        document.title,
+        window.location.pathname
+      );
     }
   }, [hasDeepLinkParams]);
 
-  // Renderizar el step actual
-  const renderCurrentStep = () => {
-    // Mostrar pantalla de carga para deep links
+  const renderContent = () => {
     if (isLoadingDeepLink) {
       return (
-        <div className="card loading-card">
-          <div className="loading-container">
-            <div className="loading-spinner"></div>
-            <p className="loading-text">Generando Invoice...</p>
-            <p className="loading-subtext">Conectando con Lightning Network</p>
-          </div>
+        <div className="loading-container">
+          <div className="loading-spinner" />
+          <p className="loading-text">Generando Invoice...</p>
+          <p className="loading-subtext">Conectando con Lightning Network</p>
         </div>
       );
     }
@@ -175,7 +191,6 @@ const PayForm = () => {
         return (
           <Step2QRInvoice
             state={state}
-            dispatch={dispatch}
             onPaymentConfirmed={handlePaymentConfirmed}
             onBack={!hasDeepLinkParams ? handleBackToStep1 : null}
           />
@@ -187,40 +202,49 @@ const PayForm = () => {
     }
   };
 
-  const userImage = process.env.REACT_APP_API_USER_IMAGE || logo;
+  const userImage = process.env.REACT_APP_API_USER_IMAGE;
   const userName = process.env.REACT_APP_API_USER || 'Lightning Invoice';
+  const initials = getInitials(userName);
+  const showImage = !!userImage && !imageError;
 
   return (
     <div className="app-container">
-      {/* Header */}
-      <header className="app-header">
-        <div className="logo-container profile-logo">
-          {!imageError ? (
-            <img
-              src={userImage}
-              alt={userName}
-              className="profile-image"
-              onError={() => setImageError(true)}
-            />
-          ) : (
-            <div className="profile-placeholder">
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-              </svg>
+      <div className="app-shell">
+        <div className="card">
+          {/* Compact Header */}
+          <div className="card-header">
+            <div className="header-row">
+              <div className="avatar-wrap">
+                <div className="avatar">
+                  {showImage ? (
+                    <img
+                      src={userImage}
+                      alt={userName}
+                      referrerPolicy="no-referrer"
+                      onError={() => setImageError(true)}
+                    />
+                  ) : (
+                    <span>{initials}</span>
+                  )}
+                </div>
+                <div className="avatar-badge">
+                  <BoltIcon size={10} />
+                </div>
+              </div>
+              <div className="header-text">
+                <h1 className="header-name">{userName}</h1>
+                <p className="header-subtitle">Lightning Network</p>
+              </div>
+              <StepIndicator currentStep={currentStep} />
             </div>
-          )}
-        </div>
-        <h1 className="app-title">{userName}</h1>
-        <p className="app-subtitle">
-          Pagar con Bitcoin <span className="subtitle-accent">⚡</span> Lightning Network
-        </p>
-        <div className="header-steps">
-          <StepIndicator currentStep={currentStep} />
-        </div>
-      </header>
+          </div>
 
-      {/* Current Step Content */}
-      {renderCurrentStep()}
+          {/* Content */}
+          <div className="card-content">{renderContent()}</div>
+        </div>
+
+        <p className="app-footer">Pagos seguros con Lightning</p>
+      </div>
     </div>
   );
 };

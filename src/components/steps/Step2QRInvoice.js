@@ -1,11 +1,76 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import QRcode from 'qrcode.react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import Swal from 'sweetalert2';
 import usePaymentVerification from '../../hooks/usePaymentVerification';
 
-const Step2QRInvoice = ({ state, dispatch, onPaymentConfirmed, onBack }) => {
+const CopyIcon = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+  </svg>
+);
+
+const CheckIcon = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+);
+
+const ZapIcon = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+  </svg>
+);
+
+const Step2QRInvoice = ({ state, onPaymentConfirmed, onBack }) => {
+  const [copied, setCopied] = useState(false);
+  const copiedTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (copiedTimeoutRef.current) {
+        clearTimeout(copiedTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleCopy = () => {
+    setCopied(true);
+    if (copiedTimeoutRef.current) {
+      clearTimeout(copiedTimeoutRef.current);
+    }
+    copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
     Swal.fire({
       toast: true,
       position: 'top-end',
@@ -13,7 +78,7 @@ const Step2QRInvoice = ({ state, dispatch, onPaymentConfirmed, onBack }) => {
       title: 'Invoice copiado',
       showConfirmButton: false,
       timer: 2000,
-      background: '#1a1d2e',
+      background: '#181a20',
       color: '#fff',
     });
   };
@@ -30,7 +95,7 @@ const Step2QRInvoice = ({ state, dispatch, onPaymentConfirmed, onBack }) => {
       title: error,
       showConfirmButton: false,
       timer: 5000,
-      background: '#1a1d2e',
+      background: '#181a20',
       color: '#fff',
     });
   }, []);
@@ -42,32 +107,26 @@ const Step2QRInvoice = ({ state, dispatch, onPaymentConfirmed, onBack }) => {
     onError: handleVerificationError,
   });
 
-  const truncateInvoice = (invoice) => {
-    if (!invoice) return '';
-    if (invoice.length <= 30) return invoice;
-    return `${invoice.slice(0, 15)}...${invoice.slice(-15)}`;
-  };
-
   if (!state.invoice) {
     return (
-      <div className="card loading-card">
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <p className="loading-text">Generando Invoice...</p>
-          <p className="loading-subtext">Conectando con Lightning Network</p>
-        </div>
+      <div className="loading-container">
+        <div className="loading-spinner" />
+        <p className="loading-text">Generando Invoice...</p>
+        <p className="loading-subtext">Conectando con Lightning Network</p>
       </div>
     );
   }
 
+  const formattedAmount = new Intl.NumberFormat('es-CL').format(state.amount);
+
   return (
-    <div className="card">
-      {/* QR Code */}
-      <div className="qr-container">
-        <div className="qr-wrapper">
+    <div className="stack fade-in">
+      {/* QR */}
+      <div className="qr-wrap">
+        <div className="qr-frame">
           <QRcode
             value={state.invoice}
-            size={140}
+            size={160}
             level="M"
             renderAs="svg"
             fgColor="#000000"
@@ -76,67 +135,48 @@ const Step2QRInvoice = ({ state, dispatch, onPaymentConfirmed, onBack }) => {
         </div>
       </div>
 
-      {/* Info Card */}
-      <div className="info-card">
-        <div className="info-row">
-          <span className="info-label">Monto</span>
-          <span className="info-value highlight">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-            </svg>
-            {state.amount.toLocaleString('es-CL')} sats
-          </span>
-        </div>
-        <div className="info-row">
-          <span className="info-label">Memo</span>
-          <span className="info-value">{state.message}</span>
-        </div>
+      {/* Amount + Memo */}
+      <div className="invoice-summary">
+        <p className="invoice-amount">
+          {formattedAmount} <span className="invoice-amount-unit">SATS</span>
+        </p>
+        {state.message && <p className="invoice-memo">{state.message}</p>}
       </div>
 
-      {/* Invoice Display */}
-      <CopyToClipboard text={state.invoice} onCopy={handleCopy}>
-        <div className="invoice-display" style={{ cursor: 'pointer' }}>
-          <span className="invoice-text">{truncateInvoice(state.invoice)}</span>
-          <button className="copy-btn" type="button">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-            </svg>
-          </button>
-        </div>
-      </CopyToClipboard>
-
-      {/* Status */}
-      <div className="status-message">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <circle cx="12" cy="12" r="10" />
-          <path d="M12 6v6l4 2" />
-        </svg>
-        Esperando pago...
+      {/* Invoice string */}
+      <div className="invoice-string">
+        <p>{state.invoice}</p>
       </div>
 
-      {/* Buttons */}
-      <div className="btn-group">
-        {onBack && (
-          <button type="button" className="btn btn-secondary" onClick={onBack}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="19" y1="12" x2="5" y2="12" />
-              <polyline points="12 19 5 12 12 5" />
-            </svg>
-            Volver
+      {/* Actions side by side */}
+      <div className="invoice-actions">
+        <CopyToClipboard text={state.invoice} onCopy={handleCopy}>
+          <button type="button" className="button button-primary">
+            {copied ? <CheckIcon /> : <CopyIcon />}
+            {copied ? 'Copiado' : 'Copiar'}
           </button>
-        )}
+        </CopyToClipboard>
         <a
           href={`lightning:${state.invoice}`}
-          className="btn btn-primary"
-          style={{ textDecoration: 'none' }}
+          className="button button-secondary"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-          </svg>
-          Abrir Wallet
+          <ZapIcon />
+          Wallet
         </a>
       </div>
+
+      {/* Waiting */}
+      <div className="waiting-row">
+        <span className="waiting-dot" />
+        <p className="waiting-text">Esperando pago...</p>
+      </div>
+
+      {/* Back / Cancel */}
+      {onBack && (
+        <button type="button" className="button button-ghost" onClick={onBack}>
+          Cancelar
+        </button>
+      )}
     </div>
   );
 };

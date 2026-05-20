@@ -4,13 +4,61 @@ import Swal from 'sweetalert2';
 import { encode } from '../../utils/base64';
 import { actionTypes } from '../../reducers/paymentReducer';
 
-const CURRENCIES = [
+const FIAT_CURRENCIES = [
   { key: 'clp', label: 'CLP' },
   { key: 'usd', label: 'USD' },
   { key: 'ars', label: 'ARS' },
   { key: 'brl', label: 'BRL' },
   { key: 'mxn', label: 'MXN' },
 ];
+
+const ChevronDownIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <polyline points="6 9 12 15 18 9" />
+  </svg>
+);
+
+const ArrowRightIcon = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <line x1="5" y1="12" x2="19" y2="12" />
+    <polyline points="12 5 19 12 12 19" />
+  </svg>
+);
+
+const LinkIcon = () => (
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+  </svg>
+);
 
 const Step1DataForm = ({
   state,
@@ -19,12 +67,10 @@ const Step1DataForm = ({
   onCurrencyChange,
   isLoading,
 }) => {
-  const [memo, setMemo] = useState(state.message || '');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const maxChars = 200;
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -37,7 +83,6 @@ const Step1DataForm = ({
 
   const handleMemoChange = (e) => {
     const value = e.target.value.slice(0, maxChars);
-    setMemo(value);
     dispatch({ type: actionTypes.SET_MESSAGE, payload: value });
   };
 
@@ -50,22 +95,16 @@ const Step1DataForm = ({
 
   const handleCurrencySelect = (currencyKey) => {
     setDropdownOpen(false);
-    if (currencyKey !== state.currency && onCurrencyChange) {
-      const options = CURRENCIES.map((c, i) => ({
-        key: i,
-        value: i,
-        text: c.key,
-      }));
-      const targetIndex = options.findIndex(o => o.text === currencyKey);
-      onCurrencyChange(
-        { preventDefault: () => {} },
-        { value: targetIndex, options }
-      );
+    if (currencyKey !== state.currency) {
+      onCurrencyChange(currencyKey);
     }
   };
 
-  const handleToggleInputMode = () => {
-    dispatch({ type: actionTypes.TOGGLE_CURRENCY_MODE });
+  const handleToggleInputMode = (mode) => {
+    const wantFiat = mode === 'fiat';
+    if (state.checked !== wantFiat) {
+      dispatch({ type: actionTypes.TOGGLE_CURRENCY_MODE });
+    }
   };
 
   const handleSubmit = (e) => {
@@ -81,164 +120,151 @@ const Step1DataForm = ({
       title: 'Link de pago copiado',
       showConfirmButton: false,
       timer: 2000,
-      background: '#1a1d2e',
+      background: '#181a20',
       color: '#fff',
     });
   };
 
-  // state.checked = true significa ingresar en moneda fiat
-  // state.checked = false significa ingresar en SATS
   const isInFiatMode = state.checked;
-  const isFormValid =
-    state.amount > 0 && state.message.trim() !== '' && state.btc_price > 0;
+  const isFormValid = state.amount > 0 && state.btc_price > 0;
 
-  const displayAmount = isInFiatMode ? state.amount_clp || '' : state.amount || '';
+  const displayAmount = isInFiatMode
+    ? state.amount_clp || ''
+    : state.amount || '';
 
-  // Generar URL de pago
   const localUrl = window.location.origin;
   const paymentUrl = !isInFiatMode
     ? `${localUrl}/?${encode(`amount=${state.amount}&memo=${state.message}&curr=sat`)}`
     : `${localUrl}/?${encode(`amount=${state.amount_clp}&memo=${state.message}&curr=${state.currency}`)}`;
 
+  const upperCurrency = state.currency.toUpperCase();
+  const formatNumber = (num) =>
+    new Intl.NumberFormat('es-CL').format(Math.round(num));
+
+  const submitClass =
+    isFormValid && !isLoading ? 'button button-primary' : 'button button-disabled';
+  const copyClass = isFormValid
+    ? 'button button-ghost'
+    : 'button button-ghost-disabled';
+
   return (
-    <div className="card">
-      <form onSubmit={handleSubmit}>
-        {/* Currency Selector */}
-        <div className="form-group">
-          <div className="currency-dropdown-wrapper" ref={dropdownRef}>
-            <button
-              type="button"
-              className="currency-dropdown-trigger"
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-            >
-              <span>{state.currency.toUpperCase()}</span>
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                className={`dropdown-arrow ${dropdownOpen ? 'open' : ''}`}
-              >
-                <polyline points="6 9 12 15 18 9" />
-              </svg>
-            </button>
-            {dropdownOpen && (
-              <div className="currency-dropdown-menu">
-                {CURRENCIES.map((curr) => (
-                  <button
-                    key={curr.key}
-                    type="button"
-                    className={`currency-dropdown-item ${state.currency === curr.key ? 'active' : ''}`}
-                    onClick={() => handleCurrencySelect(curr.key)}
-                  >
-                    {curr.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-          {state.btc_price > 0 && (
-            <div className="btc-price">
-              1 BTC = {state.currency.toUpperCase()} {state.btc_price.toLocaleString('es-CL')}
+    <form onSubmit={handleSubmit} className="stack fade-in">
+      {/* Currency + Rate inline */}
+      <div className="rate-row">
+        <div className="currency-trigger-wrap" ref={dropdownRef}>
+          <button
+            type="button"
+            className="currency-trigger"
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+          >
+            {upperCurrency}
+            <ChevronDownIcon />
+          </button>
+          {dropdownOpen && (
+            <div className="currency-menu">
+              {FIAT_CURRENCIES.map((curr) => (
+                <button
+                  key={curr.key}
+                  type="button"
+                  className={
+                    state.currency === curr.key
+                      ? 'currency-menu-item active'
+                      : 'currency-menu-item'
+                  }
+                  onClick={() => handleCurrencySelect(curr.key)}
+                >
+                  {curr.label}
+                </button>
+              ))}
             </div>
           )}
         </div>
+        {state.btc_price > 0 && (
+          <span className="rate-value">
+            1 BTC = {formatNumber(state.btc_price)} {upperCurrency}
+          </span>
+        )}
+      </div>
 
-        {/* Memo */}
-        <div className="form-group">
-          <label className="form-label">Memo</label>
+      {/* Memo */}
+      <input
+        type="text"
+        className="soft-input"
+        placeholder="Memo (opcional)"
+        aria-label="Memo"
+        value={state.message}
+        onChange={handleMemoChange}
+        maxLength={maxChars}
+      />
+
+      {/* Amount */}
+      <div className="stack-sm">
+        <div className="amount-toggle">
+          <button
+            type="button"
+            className={
+              !isInFiatMode ? 'amount-toggle-btn active' : 'amount-toggle-btn'
+            }
+            onClick={() => handleToggleInputMode('sats')}
+          >
+            SATS
+          </button>
+          <button
+            type="button"
+            className={
+              isInFiatMode ? 'amount-toggle-btn active' : 'amount-toggle-btn'
+            }
+            onClick={() => handleToggleInputMode('fiat')}
+          >
+            {upperCurrency}
+          </button>
+        </div>
+
+        <div className="amount-input-wrap">
           <input
-            type="text"
-            className="form-input"
-            placeholder="Descripcion del pago..."
-            value={memo}
-            onChange={handleMemoChange}
-            maxLength={maxChars}
+            type="number"
+            className="amount-input"
+            placeholder="0"
+            aria-label={`Monto en ${isInFiatMode ? upperCurrency : 'SATS'}`}
+            value={displayAmount}
+            onChange={handleAmountChange}
+            min="1"
           />
+          <span className="amount-suffix">
+            {isInFiatMode ? upperCurrency : 'SATS'}
+          </span>
         </div>
 
-        {/* Amount */}
-        <div className="form-group">
-          <div className="form-label-row">
-            <label className="form-label">Monto</label>
-            {state.amount > 0 && isInFiatMode && (
-              <span className="conversion-hint">{state.amount.toLocaleString('es-CL')} SATS</span>
-            )}
-            {state.amount > 0 && !isInFiatMode && state.btc_price > 0 && (
-              <span className="conversion-hint">{state.currency.toUpperCase()} {Math.ceil((state.btc_price / 100000000) * state.amount).toLocaleString('es-CL')}</span>
-            )}
-          </div>
+        <p className="amount-conversion">
+          {state.amount > 0
+            ? isInFiatMode
+              ? `≈ ${formatNumber(state.amount)} SATS`
+              : `≈ ${formatNumber(
+                  (state.btc_price / 100000000) * state.amount
+                )} ${upperCurrency}`
+            : ' '}
+        </p>
+      </div>
 
-          {/* Input Mode Toggle */}
-          <div className="input-mode-toggle">
-            <button
-              type="button"
-              className={`mode-btn ${!isInFiatMode ? 'active' : ''}`}
-              onClick={() => isInFiatMode && handleToggleInputMode()}
-            >
-              SATS
-            </button>
-            <button
-              type="button"
-              className={`mode-btn ${isInFiatMode ? 'active' : ''}`}
-              onClick={() => !isInFiatMode && handleToggleInputMode()}
-            >
-              {state.currency.toUpperCase()}
-            </button>
-          </div>
-
-          <div className="form-input-wrapper">
-            <input
-              type="number"
-              className="form-input"
-              placeholder="0"
-              value={displayAmount}
-              onChange={handleAmountChange}
-              min="1"
-              style={{ paddingRight: '80px' }}
-            />
-            <div className="currency-toggle" style={{ cursor: 'default' }}>
-              {!isInFiatMode ? 'SATS' : state.currency.toUpperCase()}
-            </div>
-          </div>
-        </div>
-
-        {/* Submit Button */}
+      {/* Actions */}
+      <div className="actions">
         <button
           type="submit"
-          className="btn btn-primary"
+          className={submitClass}
           disabled={!isFormValid || isLoading}
         >
           {isLoading ? 'Generando...' : 'Generar Invoice'}
-          {!isLoading && (
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="5" y1="12" x2="19" y2="12" />
-              <polyline points="12 5 19 12 12 19" />
-            </svg>
-          )}
+          {!isLoading && <ArrowRightIcon />}
         </button>
 
-        {/* Payment Link */}
-        <div className="payment-link-section">
-          <CopyToClipboard text={paymentUrl} onCopy={handleCopyLink}>
-            <button
-              type="button"
-              className="btn btn-link"
-              disabled={!isFormValid}
-              style={{ opacity: isFormValid ? 1 : 0.4 }}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-              </svg>
-              Copiar link de pago
-            </button>
-          </CopyToClipboard>
-        </div>
-      </form>
-    </div>
+        <CopyToClipboard text={paymentUrl} onCopy={handleCopyLink}>
+          <button type="button" className={copyClass} disabled={!isFormValid}>
+            <LinkIcon />
+            Copiar link
+          </button>
+        </CopyToClipboard>
+      </div>
+    </form>
   );
 };
 
