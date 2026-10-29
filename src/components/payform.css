@@ -479,6 +479,15 @@ input {
   color: var(--foreground);
 }
 
+.lnurl-address {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--primary);
+  word-break: break-all;
+}
+
 .invoice-amount-unit {
   color: var(--primary);
   font-size: 1rem;

@@ -3,6 +3,7 @@ import { getBtcPrice } from '../helpers/getBtcPrice';
 import { getInvoice } from '../helpers/getInvoice';
 import { getCurencies } from './../helpers/getCurrencies';
 import { getQueryParams } from '../utils/base64';
+import { getLightningAddress, isValidLightningAddress } from '../utils/lnurl';
 import {
   paymentReducer,
   initialState,
@@ -12,6 +13,7 @@ import StepIndicator from './steps/StepIndicator';
 import Step1DataForm from './steps/Step1DataForm';
 import Step2QRInvoice from './steps/Step2QRInvoice';
 import Step3Confirmation from './steps/Step3Confirmation';
+import LnurlView from './LnurlView';
 import './payform.css';
 
 const BoltIcon = ({ size = 10 }) => (
@@ -31,6 +33,14 @@ const BoltIcon = ({ size = 10 }) => (
 );
 
 const DEFAULT_MEMO = 'Pago Lightning';
+const LIGHTNING_ADDRESS = getLightningAddress();
+const HAS_LIGHTNING_ADDRESS = isValidLightningAddress(LIGHTNING_ADDRESS);
+
+if (LIGHTNING_ADDRESS && !HAS_LIGHTNING_ADDRESS) {
+  console.warn(
+    `REACT_APP_LIGHTNING_ADDRESS inválida: "${LIGHTNING_ADDRESS}". Se oculta la vista LNURL.`
+  );
+}
 
 const getInitials = (name) => {
   if (!name) return '';
@@ -47,6 +57,7 @@ const PayForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoadingDeepLink, setIsLoadingDeepLink] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [showLnurl, setShowLnurl] = useState(false);
 
   const queryParams = getQueryParams(window.location.search);
   const queryAmount = parseInt(queryParams.get('amount'));
@@ -176,6 +187,15 @@ const PayForm = () => {
       );
     }
 
+    if (showLnurl) {
+      return (
+        <LnurlView
+          address={LIGHTNING_ADDRESS}
+          onBack={() => setShowLnurl(false)}
+        />
+      );
+    }
+
     switch (currentStep) {
       case 1:
         return (
@@ -185,6 +205,9 @@ const PayForm = () => {
             onAdvance={handleAdvanceToStep2}
             onCurrencyChange={handleCurrencyChange}
             isLoading={state.isLoading}
+            onShowLnurl={
+              HAS_LIGHTNING_ADDRESS ? () => setShowLnurl(true) : null
+            }
           />
         );
       case 2:

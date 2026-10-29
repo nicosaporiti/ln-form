@@ -36,7 +36,10 @@ REACT_APP_API_URL_INVOICE='https://myapi.com/newinvoice'
 REACT_APP_API_URL_STATUS='https://myapi.com/status'
 REACT_APP_API_USER='username'
 REACT_APP_API_USER_IMAGE='url User Image'
+REACT_APP_LIGHTNING_ADDRESS='pay@myapi.com'
 ```
+
+`REACT_APP_LIGHTNING_ADDRESS` is optional and must point to the backend domain serving `/.well-known/lnurlp/:username`. The LNURL (LUD-01) is derived client-side in `src/utils/lnurl.js`; if unset or invalid, the "Ver Lightning Address / LNURL" button is hidden.
 
 ## Architecture
 
@@ -51,6 +54,7 @@ src/
 │   │   ├── Step1DataForm.js    # Form for amount, message, currency
 │   │   ├── Step2QRInvoice.js   # QR code display + payment polling
 │   │   └── Step3Confirmation.js # Success message + reset
+│   ├── LnurlView.js            # Lightning Address + LNURL QR view
 │   ├── PaymentLink.js          # Shareable payment link generator
 │   ├── Profile.js              # User profile display
 │   └── payform.css             # Styles including Step theming
@@ -64,7 +68,8 @@ src/
 │   ├── getBtcPrice.js          # Fetch BTC price from CoinGecko
 │   └── getCurrencies.js        # Available currency options
 └── utils/
-    └── base64.js               # Encode/decode for deep linking
+    ├── base64.js               # Encode/decode for deep linking
+    └── lnurl.js                # bech32 LNURL encoding (LUD-01/16)
 ```
 
 ### State Management
